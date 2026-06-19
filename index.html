@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#15171A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Shop Calc">
-<title>Shop Calc — Machinist Tools</title>
+<meta name="apple-mobile-web-app-title" content="Shop Calculators">
+<title>Custom Shop Calculators — Machinist Tools</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
@@ -86,6 +86,7 @@ body{
   cursor:pointer;
 }
 .hist-btn.hidden{display:none;}
+.hidden{display:none !important;}
 .hist-icon{
   width:16px;height:16px;
   border:2px solid var(--amber);
@@ -133,7 +134,7 @@ body{
   line-height:1.05;
   margin-top:6px;
 }
-.tool-list{display:flex;flex-direction:column;gap:14px;}
+.tool-list{display:flex;flex-direction:column;gap:14px;margin-top:18px;}
 .tool-card{
   background:var(--bg-card);
   border:1px solid var(--line);
@@ -415,6 +416,57 @@ body{
 }
 .note-banner .mark{color:var(--amber);font-weight:700;flex-shrink:0;}
 
+/* ===== Tabs (RPM/Feed results) ===== */
+.tab-row{
+  display:flex;
+  background:var(--bg-card);
+  border:1px solid var(--steel);
+  border-radius:10px;
+  padding:4px;
+  gap:4px;
+  margin-bottom:20px;
+}
+.tab-btn{
+  flex:1;
+  background:none;
+  border:none;
+  color:var(--text-dim);
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:14px;
+  text-transform:uppercase;
+  letter-spacing:0.03em;
+  padding:12px 8px;
+  border-radius:7px;
+  cursor:pointer;
+}
+.tab-btn.active{
+  background:var(--amber);
+  color:#1a1500;
+}
+.tab-btn:disabled{
+  color:#52585e;
+  opacity:0.6;
+  cursor:not-allowed;
+}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
+.feed-rpm-note{
+  background:var(--bg-card);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:12px 16px;
+  font-size:13px;
+  color:var(--text-dim);
+  margin-bottom:20px;
+  text-align:center;
+}
+.feed-rpm-note span{
+  font-family:var(--font-num);
+  color:var(--amber);
+  font-weight:600;
+}
+
 /* ===== History / List entries ===== */
 .entry-list{display:flex;flex-direction:column;gap:10px;}
 .empty-state{
@@ -542,6 +594,7 @@ body{
 .list-card-entry.accent-amber{border-top-color:var(--amber);}
 .list-card-entry.accent-blue{border-top-color:#4A8FB7;}
 .list-card-entry.accent-green{border-top-color:var(--green);}
+.list-card-entry.accent-violet{border-top-color:#9B6FC7;}
 
 .lc-body{
   display:flex;
@@ -563,6 +616,7 @@ body{
 .lc-icon{color:var(--amber);font-size:11px;}
 .list-card-entry.accent-blue .lc-icon{color:#4A8FB7;}
 .list-card-entry.accent-green .lc-icon{color:var(--green);}
+.list-card-entry.accent-violet .lc-icon{color:#9B6FC7;}
 
 .lc-hero{
   flex:0 0 90px;
@@ -739,7 +793,7 @@ body{
   <div class="topbar">
     <div class="back hidden" id="backBtn">‹</div>
     <div style="flex:1;">
-      <h1 id="topTitle">Shop Calc</h1>
+      <h1 id="topTitle">Custom Shop Calculators</h1>
       <div class="sub" id="topSub">Machinist Tools</div>
     </div>
     <div class="hist-btn hidden" id="histBtn" title="History">
@@ -749,10 +803,6 @@ body{
 
   <!-- HOME -->
   <div class="screen active" id="screen-home">
-    <div class="home-header">
-      <div class="eyebrow">v1.0 · offline ready</div>
-      <h1>Shop Floor<br>Calculator</h1>
-    </div>
     <div class="tool-list">
       <div class="tool-card list-card hidden" id="pinnedListCard" onclick="nav('list')">
         <div class="num" style="color:var(--green);border-color:var(--green);">★</div>
@@ -786,8 +836,16 @@ body{
         </div>
         <div class="chev">›</div>
       </div>
+      <div class="tool-card" onclick="nav('rpm')">
+        <div class="num">4</div>
+        <div class="body">
+          <div class="title">RPM / Feed</div>
+          <div class="desc">Spindle speed from surface speed, then feed rate</div>
+        </div>
+        <div class="chev">›</div>
+      </div>
     </div>
-    <div class="footer-note">Works offline · Add to Home Screen for app mode</div>
+    <div class="footer-note">v1.1 · Works offline · Add to Home Screen for app mode</div>
   </div>
 
   <!-- TOOL 1: TAPER -->
@@ -998,6 +1056,104 @@ body{
     </div>
   </div>
 
+  <!-- TOOL 4: RPM/FEED INPUT -->
+  <div class="screen" id="screen-rpm">
+    <div class="field">
+      <label>Surface Speed (SFPM)</label>
+      <div class="input-wrap">
+        <input type="number" inputmode="decimal" id="rpmSfpm" enterkeyhint="next" placeholder="0.0" step="any">
+        <span class="unit">ft/min</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Cutter Diameter</label>
+      <div class="input-wrap">
+        <input type="number" inputmode="decimal" id="rpmDia" enterkeyhint="go" placeholder="0.0000" step="any">
+        <span class="unit">in</span>
+      </div>
+      <div class="hint">RPM = (SFPM ÷ Cutter Diameter) × 3.82</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="calcRpm()">Calculate</button>
+    </div>
+  </div>
+
+  <!-- TOOL 4 RESULTS (tabbed: RPM / Feed) -->
+  <div class="screen" id="screen-rpm-result">
+    <div class="tab-row">
+      <button class="tab-btn active" id="rpmTabBtn" onclick="showRpmTab('rpm')">RPM</button>
+      <button class="tab-btn" id="feedTabBtn" onclick="showRpmTab('feed')" disabled>Feed</button>
+    </div>
+
+    <!-- RPM TAB -->
+    <div class="tab-pane active" id="tabpane-rpm">
+      <div class="result-hero">
+        <div class="label">Spindle Speed</div>
+        <div class="value"><span id="rpmValue">0</span><span class="unit">RPM</span></div>
+      </div>
+      <div class="result-grid">
+        <div class="result-card">
+          <div class="label">Surface Speed</div>
+          <div class="value" id="rpmOutSfpm">0<span class="unit">ft/min</span></div>
+        </div>
+        <div class="result-card">
+          <div class="label">Cutter Ø</div>
+          <div class="value" id="rpmOutDia">0.0000<span class="unit">in</span></div>
+        </div>
+      </div>
+      <button class="pin-result-btn" id="rpmPinBtn" data-pin-module="rpm" onclick="togglePinCurrent('rpm')">Pin This Result</button>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="nav('rpm')">Edit Values</button>
+        <button class="btn btn-primary" onclick="nav('home')">Close</button>
+      </div>
+    </div>
+
+    <!-- FEED TAB -->
+    <div class="tab-pane" id="tabpane-feed">
+      <div class="feed-rpm-note">Using <span id="feedRpmRef">0</span> RPM from this calculation</div>
+      <div class="field">
+        <label>Chip Load Per Tooth</label>
+        <div class="input-wrap">
+          <input type="number" inputmode="decimal" id="feedChipLoad" enterkeyhint="next" placeholder="0.0000" step="any">
+          <span class="unit">in</span>
+        </div>
+      </div>
+      <div class="field">
+        <label># of Flutes</label>
+        <div class="input-wrap">
+          <input type="number" inputmode="decimal" id="feedFlutes" enterkeyhint="go" placeholder="0" step="1">
+          <span class="unit">flutes</span>
+        </div>
+        <div class="hint">Feed = Chip Load × Flutes × RPM</div>
+      </div>
+      <div class="btn-row" id="feedCalcRow">
+        <button class="btn btn-primary" onclick="calcFeed()">Calculate Feed</button>
+      </div>
+
+      <div id="feedResultBlock" class="hidden">
+        <div class="result-hero">
+          <div class="label">Feed Rate</div>
+          <div class="value"><span id="feedValue">0.0000</span><span class="unit">in/min</span></div>
+        </div>
+        <div class="result-grid">
+          <div class="result-card">
+            <div class="label">Chip Load</div>
+            <div class="value" id="feedOutChipLoad">0.0000<span class="unit">in</span></div>
+          </div>
+          <div class="result-card">
+            <div class="label">Flutes</div>
+            <div class="value" id="feedOutFlutes">0</div>
+          </div>
+        </div>
+        <button class="pin-result-btn" id="rpmFeedPinBtn" data-pin-module="rpm" onclick="togglePinCurrent('rpm')">Pin This Result</button>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="nav('rpm')">Edit Values</button>
+          <button class="btn btn-primary" onclick="nav('home')">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- HISTORY SCREEN (shared template, populated per module) -->
   <div class="screen" id="screen-history">
     <div class="entry-list" id="historyEntries"></div>
@@ -1036,12 +1192,17 @@ function loadStore(){
     if(raw){
       const parsed = JSON.parse(raw);
       return {
-        history: { taper: parsed.history?.taper||[], drill: parsed.history?.drill||[], xy: parsed.history?.xy||[] },
+        history: {
+          taper: parsed.history?.taper||[],
+          drill: parsed.history?.drill||[],
+          xy: parsed.history?.xy||[],
+          rpm: parsed.history?.rpm||[]
+        },
         pinned: parsed.pinned||[]
       };
     }
   }catch(e){}
-  return { history:{taper:[],drill:[],xy:[]}, pinned:[] };
+  return { history:{taper:[],drill:[],xy:[],rpm:[]}, pinned:[] };
 }
 function saveStore(){
   try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }catch(e){}
@@ -1067,7 +1228,7 @@ function addHistory(module, record){
 
 // ===== Navigation =====
 const titles = {
-  home: ['Shop Calc','Machinist Tools'],
+  home: ['Custom Shop Calculators','Machinist Tools'],
   taper: ['Tapered Hole','Z-Offset Calculator'],
   'taper-result': ['Tapered Hole','Result'],
   drill: ['Drill Tip','Calculator'],
@@ -1075,19 +1236,22 @@ const titles = {
   xy1: ['X/Y Location','Step 1 of 3'],
   xy2: ['X/Y Location','Step 2 of 3'],
   xy3: ['X/Y Location','Result'],
+  rpm: ['RPM / Feed','Spindle Speed Calculator'],
+  'rpm-result': ['RPM / Feed','Result'],
   history: ['History','Last 100 Results'],
   list: ['Pinned List','Up to 8 Results'],
 };
 const HIST_MODULE_FOR_SCREEN = {
   taper:'taper', 'taper-result':'taper',
   drill:'drill', 'drill-result':'drill',
-  xy1:'xy', xy2:'xy', xy3:'xy'
+  xy1:'xy', xy2:'xy', xy3:'xy',
+  rpm:'rpm', 'rpm-result':'rpm'
 };
 
 let currentScreen = 'home';
 
 function nav(name){
-  const RESULT_SCREENS = ['taper-result','drill-result','xy3'];
+  const RESULT_SCREENS = ['taper-result','drill-result','xy3','rpm-result'];
   if(!RESULT_SCREENS.includes(name)){
     resultBackOverride = null;
   }
@@ -1116,7 +1280,7 @@ function nav(name){
 }
 
 function backFrom(name){
-  if((name==='taper-result' || name==='drill-result' || name==='xy3') && resultBackOverride){
+  if((name==='taper-result' || name==='drill-result' || name==='xy3' || name==='rpm-result') && resultBackOverride){
     const target = resultBackOverride;
     resultBackOverride = null;
     nav(target);
@@ -1126,6 +1290,7 @@ function backFrom(name){
     taper:'home', 'taper-result':'taper',
     drill:'home', 'drill-result':'drill',
     xy1:'home', xy2:'xy1', xy3:'xy2',
+    rpm:'home', 'rpm-result':'rpm',
     history: historyReturnScreen || 'home',
     list:'home'
   };
@@ -1183,6 +1348,40 @@ function renderXyResult(r){
   document.getElementById('xyOutY').innerHTML = r.yOut.toFixed(4)+'<span class="unit">in</span>';
   lastResult.xy = r;
   refreshPinButton('xy');
+}
+
+function renderRpmResult(r){
+  document.getElementById('rpmValue').textContent = Math.round(r.rpm);
+  document.getElementById('rpmOutSfpm').innerHTML = r.sfpm.toFixed(1)+'<span class="unit">ft/min</span>';
+  document.getElementById('rpmOutDia').innerHTML = r.dia.toFixed(4)+'<span class="unit">in</span>';
+
+  const feedTabBtn = document.getElementById('feedTabBtn');
+  const feedResultBlock = document.getElementById('feedResultBlock');
+  const feedCalcRow = document.getElementById('feedCalcRow');
+  document.getElementById('feedRpmRef').textContent = Math.round(r.rpm);
+
+  // Feed tab is reachable as soon as we have an RPM value — it's where
+  // Chip Load / Flutes get entered. Only the result display inside the
+  // tab depends on whether Feed has actually been calculated yet.
+  feedTabBtn.disabled = false;
+
+  if(r.hasFeed){
+    document.getElementById('feedValue').textContent = r.feed.toFixed(4);
+    document.getElementById('feedOutChipLoad').innerHTML = r.chipLoad.toFixed(4)+'<span class="unit">in</span>';
+    document.getElementById('feedOutFlutes').textContent = r.flutes;
+    document.getElementById('feedChipLoad').value = r.chipLoad;
+    document.getElementById('feedFlutes').value = r.flutes;
+    feedResultBlock.classList.remove('hidden');
+    feedCalcRow.classList.add('hidden');
+  } else {
+    feedResultBlock.classList.add('hidden');
+    feedCalcRow.classList.remove('hidden');
+    document.getElementById('feedChipLoad').value = '';
+    document.getElementById('feedFlutes').value = '';
+  }
+  showRpmTab('rpm');
+  lastResult.rpm = r;
+  refreshPinButton('rpm');
 }
 
 // ===== Tool 1: Tapered Hole =====
@@ -1255,6 +1454,56 @@ function xyStep3(){
   nav('xy3');
 }
 
+// ===== Tool 4: RPM / Feed =====
+function calcRpm(){
+  const sfpm = parseFloat(document.getElementById('rpmSfpm').value);
+  const dia = parseFloat(document.getElementById('rpmDia').value);
+
+  if(!validNum(sfpm) || sfpm<=0 || !validNum(dia) || dia<=0){
+    flashInvalid(['rpmSfpm','rpmDia']);
+    return;
+  }
+
+  const rpm = (sfpm / dia) * 3.82;
+  const record = { sfpm, dia, rpm, hasFeed:false, chipLoad:null, flutes:null, feed:null };
+  renderRpmResult(record);
+  addHistory('rpm', record);
+  nav('rpm-result');
+}
+
+function calcFeed(){
+  const chipLoad = parseFloat(document.getElementById('feedChipLoad').value);
+  const flutes = parseFloat(document.getElementById('feedFlutes').value);
+
+  if(!validNum(chipLoad) || chipLoad<=0 || !validNum(flutes) || flutes<=0){
+    flashInvalid(['feedChipLoad','feedFlutes']);
+    return;
+  }
+
+  const base = lastResult.rpm;
+  if(!base) return;
+
+  const feed = chipLoad * flutes * base.rpm;
+  const record = Object.assign({}, base, { hasFeed:true, chipLoad, flutes, feed });
+  renderRpmResult(record);
+  addHistory('rpm', record);
+  showRpmTab('feed');
+}
+
+function showRpmTab(tab){
+  const rpmBtn = document.getElementById('rpmTabBtn');
+  const feedBtn = document.getElementById('feedTabBtn');
+  const rpmPane = document.getElementById('tabpane-rpm');
+  const feedPane = document.getElementById('tabpane-feed');
+
+  if(tab === 'feed' && feedBtn.disabled) return;
+
+  rpmBtn.classList.toggle('active', tab==='rpm');
+  feedBtn.classList.toggle('active', tab==='feed');
+  rpmPane.classList.toggle('active', tab==='rpm');
+  feedPane.classList.toggle('active', tab==='feed');
+}
+
 // ===== Validation helpers =====
 function validNum(n){ return typeof n === 'number' && !isNaN(n) && isFinite(n); }
 function flashInvalid(ids){
@@ -1277,6 +1526,8 @@ const FIELD_CHAINS = [
   { fields:['drillDia','drillAngle','drillDepth'], submit:calcDrill },
   { fields:['xyDia'], submit:xyStep2 },
   { fields:['xyX','xyY'], submit:xyStep3 },
+  { fields:['rpmSfpm','rpmDia'], submit:calcRpm },
+  { fields:['feedChipLoad','feedFlutes'], submit:calcFeed },
 ];
 const FIELD_NEXT = {};
 const FIELD_SUBMIT = {};
@@ -1306,7 +1557,7 @@ document.querySelectorAll('.input-wrap input').forEach(inp=>{
 });
 
 // ===== Pinning =====
-let lastResult = { taper:null, drill:null, xy:null };
+let lastResult = { taper:null, drill:null, xy:null, rpm:null };
 const MAX_PINNED = 8;
 
 function isPinned(id){
@@ -1314,11 +1565,13 @@ function isPinned(id){
 }
 function refreshPinButton(module){
   const r = lastResult[module];
-  const btn = document.getElementById(module+'PinBtn');
-  if(!btn || !r) return;
+  if(!r) return;
   const pinned = r.id && isPinned(r.id);
-  btn.textContent = pinned ? 'Pinned ✓' : 'Pin This Result';
-  btn.classList.toggle('pinned', !!pinned);
+  const btns = document.querySelectorAll('[data-pin-module="'+module+'"], #'+module+'PinBtn');
+  btns.forEach(btn=>{
+    btn.textContent = pinned ? 'Pinned ✓' : 'Pin This Result';
+    btn.classList.toggle('pinned', !!pinned);
+  });
 }
 function togglePinCurrent(module){
   const r = lastResult[module];
@@ -1370,8 +1623,8 @@ function refreshHomeListCard(){
 // ===== History screen =====
 let historyReturnScreen = 'home';
 let resultBackOverride = null; // when set, back from a result screen goes here instead of the default
-const MODULE_LABEL = { taper:'Tapered Hole', drill:'Drill Tip', xy:'X/Y Location' };
-const RESULT_SCREEN = { taper:'taper-result', drill:'drill-result', xy:'xy3' };
+const MODULE_LABEL = { taper:'Tapered Hole', drill:'Drill Tip', xy:'X/Y Location', rpm:'RPM / Feed' };
+const RESULT_SCREEN = { taper:'taper-result', drill:'drill-result', xy:'xy3', rpm:'rpm-result' };
 
 function openHistory(module){
   historyReturnScreen = currentScreen;
@@ -1393,6 +1646,11 @@ function summaryFor(module, r){
   }
   if(module==='xy'){
     return 'Ø'+r.dia.toFixed(4)+'" · X−r '+r.xOut.toFixed(4)+'" · Y−r '+r.yOut.toFixed(4)+'"';
+  }
+  if(module==='rpm'){
+    let s = Math.round(r.rpm)+' RPM @ '+r.sfpm.toFixed(1)+' SFPM · Ø'+r.dia.toFixed(4)+'"';
+    if(r.hasFeed) s += ' · Feed '+r.feed.toFixed(4)+' in/min';
+    return s;
   }
   return '';
 }
@@ -1422,13 +1680,21 @@ function restoreFromHistory(module, id, fromList){
   if(module==='taper') renderTaperResult(r);
   if(module==='drill') renderDrillResult(r);
   if(module==='xy') renderXyResult(r);
+  if(module==='rpm') renderRpmResult(r);
   resultBackOverride = fromList ? 'list' : null;
   nav(RESULT_SCREEN[module]);
 }
 
 // ===== Pinned List screen =====
-const MODULE_ACCENT = { taper:'amber', drill:'blue', xy:'green' };
-const MODULE_ICON = { taper:'◢', drill:'▽', xy:'⊹' };
+const MODULE_ACCENT = { taper:'amber', drill:'blue', xy:'green', rpm:'violet' };
+const MODULE_ICON = { taper:'◢', drill:'▽', xy:'⊹', rpm:'◉' };
+
+function displayLabelFor(r){
+  if(r.module === 'rpm'){
+    return r.hasFeed ? 'Feed' : 'RPM';
+  }
+  return MODULE_LABEL[r.module];
+}
 
 function listCardFor(r){
   const accent = MODULE_ACCENT[r.module];
@@ -1460,7 +1726,7 @@ function listCardFor(r){
     chipsHtml = chips.map(c=>
       '<div class="list-chip"><span class="ck">'+c[0]+'</span><span class="cv">'+c[1]+'</span></div>'
     ).join('');
-  } else {
+  } else if(r.module === 'xy'){
     hero = r.dia.toFixed(4);
     heroLabel = 'Hole Diameter';
     const radius = r.dia/2;
@@ -1475,6 +1741,28 @@ function listCardFor(r){
         + '<span class="ceq">'+r.y.toFixed(4)+' − '+radius.toFixed(4)+'</span>'
         + '<span class="cv">'+r.yOut.toFixed(4)+'</span>'
       + '</div>';
+  } else {
+    if(r.hasFeed){
+      hero = r.feed.toFixed(4);
+      heroLabel = 'Feed Rate';
+      const chips = [
+        ['Chip Load', r.chipLoad.toFixed(4)],
+        ['Flutes', r.flutes+'']
+      ];
+      chipsHtml = chips.map(c=>
+        '<div class="list-chip"><span class="ck">'+c[0]+'</span><span class="cv">'+c[1]+'</span></div>'
+      ).join('');
+    } else {
+      hero = Math.round(r.rpm)+'';
+      heroLabel = 'RPM';
+      const chips = [
+        ['SFPM', r.sfpm.toFixed(1)],
+        ['Cutter Ø', r.dia.toFixed(4)]
+      ];
+      chipsHtml = chips.map(c=>
+        '<div class="list-chip"><span class="ck">'+c[0]+'</span><span class="cv">'+c[1]+'</span></div>'
+      ).join('');
+    }
   }
 
   return '<div class="list-card-swipe-wrap" data-id="'+r.id+'">'
@@ -1482,7 +1770,7 @@ function listCardFor(r){
     + '<div class="list-card-entry accent-'+accent+'">'
     + '<div class="lc-body" onclick="restoreFromHistory(\''+r.module+'\',\''+r.id+'\',true)">'
     + '<div class="lc-hero">'
-    + '<div class="lc-module"><span class="lc-icon">'+MODULE_ICON[r.module]+'</span>'+MODULE_LABEL[r.module]+'</div>'
+    + '<div class="lc-module"><span class="lc-icon">'+MODULE_ICON[r.module]+'</span>'+displayLabelFor(r)+'</div>'
     + '<div class="lc-hero-center">'
     + '<div class="lc-hero-value">'+hero+'</div>'
     + '<div class="lc-hero-label">'+heroLabel+'</div>'

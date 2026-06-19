@@ -1,7 +1,7 @@
 {
-  "name": "Shop Calc - Machinist Tools",
+  "name": "Custom Shop Calculators - Machinist Tools",
   "short_name": "Shop Calc",
-  "description": "Tapered hole offset, drill tip, and X/Y location calculators for the shop floor.",
+  "description": "Tapered hole offset, drill tip, X/Y location, and RPM/Feed calculators for the shop floor.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
