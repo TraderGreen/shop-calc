@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Shop Calculators">
-<title>Custom Shop Calculators — Machinist Tools</title>
+<title>SHOP CALCULATORS — Machinist Tools</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
@@ -175,6 +175,32 @@ body{
 .tool-card.list-card{border-left-color:var(--green);}
 .tool-card.hidden{display:none;}
 
+.saved-entries-banner{
+  display:flex;
+  align-items:center;
+  width:100%;
+  padding:10px 0;
+  font-size:12px;
+  font-weight:400;
+  color:var(--text-dim);
+  background:transparent;
+  border:none;
+  border-radius:0;
+  cursor:pointer;
+  letter-spacing:0.04em;
+  transition:color 0.12s ease;
+}
+.saved-entries-banner::before,
+.saved-entries-banner::after{
+  content:'';
+  flex:1;
+  height:1px;
+  background:var(--line);
+}
+.saved-entries-banner::before{margin-right:12px;}
+.saved-entries-banner::after{margin-left:12px;}
+.saved-entries-banner:active{color:var(--text);}
+
 .footer-note{
   margin-top:auto;
   padding-top:24px;
@@ -224,7 +250,7 @@ body{
   width:100%;
   min-width:0;
 }
-.input-wrap input::placeholder{color:#52585e;}
+.input-wrap input::placeholder{color:#52585e;opacity:0.3;}
 .input-wrap .unit{
   font-family:var(--font-num);
   font-size:15px;
@@ -284,9 +310,16 @@ body{
 
 /* ===== Step indicator ===== */
 .steps{display:flex;gap:6px;margin-bottom:24px;}
-.steps .dot{flex:1;height:4px;border-radius:2px;background:var(--line);}
-.steps .dot.done{background:var(--amber);}
-.steps .dot.current{background:var(--amber-dim);}
+.steps .dot{
+  flex:1;
+  height:4px;
+  border-radius:2px;
+  background-color:var(--line);
+}
+.steps .dot.done,
+.steps .dot.current{
+  background-color:#F2A900;
+}
 
 /* ===== Instruction card ===== */
 .instruction-card{
@@ -568,8 +601,11 @@ body{
 }
 .list-card-delete-bg{
   position:absolute;
-  inset:0;
-  background:var(--red);
+  top:0;
+  right:0;
+  bottom:0;
+  width:50%;
+  background-color:var(--red);
   color:#fff;
   display:flex;
   align-items:center;
@@ -580,6 +616,25 @@ body{
   font-weight:600;
   text-transform:uppercase;
   letter-spacing:0.04em;
+  z-index:0;
+}
+.list-card-select-bg{
+  position:absolute;
+  top:0;
+  left:0;
+  bottom:0;
+  width:50%;
+  background-color:#4A8FB7;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:var(--font-display);
+  font-size:14px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+  z-index:0;
 }
 .list-card-entry{
   background:var(--bg-card);
@@ -688,6 +743,22 @@ body{
   line-height:1.3;
   text-align:center;
 }
+.list-chip-rpm-ref{
+  grid-column:1 / -1;
+  background:var(--bg-card);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:5px 10px;
+  font-size:11px;
+  color:var(--text-dim);
+  text-align:center;
+  line-height:1.3;
+}
+.list-chip-rpm-ref span{
+  font-family:var(--font-num);
+  color:var(--amber);
+  font-weight:600;
+}
 .list-chip.eq .ceq{
   font-family:var(--font-num);
   font-size:10px;
@@ -698,12 +769,94 @@ body{
   text-align:center;
 }
 
-/* ===== Clear All button ===== */
+/* XY result screen: equation chips at 150% of list-chip base sizes */
+.xy-result-chips{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:16px;
+}
+.xy-result-chips .list-chip.eq{
+  background:var(--bg-card);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:18px 16px;
+}
+.xy-result-chips .list-chip.eq .ck{font-size:10.8px;}
+.xy-result-chips .list-chip.eq .ceq{font-size:15px;}
+.xy-result-chips .list-chip.eq .cv{font-size:19.5px;}
+
+/* ===== Pinned list toolbar: search + Clear All / Save ===== */
 .list-toolbar{
   display:flex;
+  align-items:flex-start;
   justify-content:flex-end;
+  gap:10px;
   margin-bottom:14px;
 }
+.list-search-wrap{
+  flex:1 1 auto;
+  min-width:0;
+  position:relative;
+}
+#listSearchInput{
+  width:100%;
+  box-sizing:border-box;
+  background:var(--bg-card);
+  border:1px solid var(--line);
+  border-radius:8px;
+  color:var(--text);
+  font-size:14px;
+  padding:9px 12px;
+  outline:none;
+}
+#listSearchInput::placeholder{color:#52585e;opacity:0.3;}
+#listSearchInput.active-save{
+  border-color:#4A8FB7;
+  box-shadow:0 0 0 1px #4A8FB7;
+}
+.list-search-dropdown{
+  position:absolute;
+  top:calc(100% + 4px);
+  left:0;
+  right:0;
+  background:var(--bg-card);
+  border:1px solid var(--line);
+  border-radius:8px;
+  max-height:220px;
+  overflow-y:auto;
+  z-index:60;
+  box-shadow:0 8px 24px rgba(0,0,0,0.35);
+}
+.list-search-dropdown.hidden{display:none;}
+.list-search-dropdown-item{
+  padding:10px 12px;
+  font-size:14px;
+  cursor:pointer;
+  border-bottom:1px solid var(--line);
+}
+.list-search-dropdown-item:last-child{border-bottom:none;}
+.list-search-dropdown-item:active{background:rgba(74,143,183,0.12);}
+.list-search-dropdown-item.muted{
+  color:var(--text-dim);
+  font-size:13px;
+  cursor:default;
+}
+.list-search-dropdown-item.muted:active{background:transparent;}
+.list-search-dropdown-manage{
+  font-size:11px;
+  color:var(--text-dim);
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+}
+.list-search-msg{
+  font-size:12px;
+  margin-top:6px;
+  line-height:1.4;
+}
+.list-search-msg.hidden{display:none;}
+.list-search-msg.error{color:var(--red);}
+.list-search-msg.success{color:var(--green);}
 .clear-all-btn{
   background:none;
   border:1px solid var(--red);
@@ -714,7 +867,150 @@ body{
   letter-spacing:0.04em;
   padding:9px 16px;
   border-radius:8px;
+  flex-shrink:0;
 }
+.save-snapshot-btn{
+  background:none;
+  border:1px solid #4A8FB7;
+  color:#4A8FB7;
+  font-size:12px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+  padding:9px 16px;
+  border-radius:8px;
+  flex-shrink:0;
+}
+.save-snapshot-btn.hidden{display:none;}
+
+/* Multi-select on pinned cards */
+.list-card-swipe-wrap.selected .list-card-entry{
+  outline:2px solid #4A8FB7;
+  box-shadow:0 0 0 1px #4A8FB7;
+}
+.list-card-select-check{
+  position:absolute;
+  left:10px;
+  top:50%;
+  transform:translateY(-50%);
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  background:#4A8FB7;
+  color:#fff;
+  font-size:14px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:5;
+  pointer-events:none;
+}
+.list-card-swipe-wrap.selected .lc-body{padding-left:38px;}
+
+/* Recalled snapshot separator */
+.list-snapshot-sep{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:10px 0 12px;
+  color:var(--text-dim);
+}
+.list-snapshot-sep-line{
+  flex:1;
+  height:1px;
+  background:var(--line);
+}
+.list-snapshot-sep-label{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  white-space:nowrap;
+}
+
+/* Manage Saved Entries modal */
+.manage-entries-modal{max-width:420px;}
+.manage-entries-list{
+  max-height:280px;
+  overflow-y:auto;
+  margin-bottom:16px;
+  border:1px solid var(--line);
+  border-radius:8px;
+}
+.manage-select-all{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 12px;
+  font-size:13px;
+  font-weight:600;
+  border-bottom:1px solid var(--line);
+  background:rgba(255,255,255,0.02);
+}
+.manage-entry-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-bottom:1px solid var(--line);
+  font-size:14px;
+}
+.manage-entry-row:last-child{border-bottom:none;}
+.manage-entry-row label{
+  flex:1;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  cursor:pointer;
+  min-width:0;
+}
+.manage-entry-label{
+  flex:1;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.manage-entry-date{
+  font-size:11px;
+  color:var(--text-dim);
+  flex-shrink:0;
+}
+.manage-entries-empty{
+  padding:20px 12px;
+  text-align:center;
+  color:var(--text-dim);
+  font-size:13px;
+}
+.manage-entries-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+.manage-entries-actions .btn-danger.active{
+  opacity:1;
+  pointer-events:auto;
+}
+.manage-entries-footer{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  padding-top:4px;
+  border-top:1px solid var(--line);
+}
+.manage-entries-footer .btn{
+  flex:1 1 auto;
+  min-width:80px;
+}
+.manage-delete-confirm{
+  padding:8px 0 4px;
+}
+.manage-delete-confirm p{
+  font-size:14px;
+  color:var(--text-dim);
+  margin-bottom:14px;
+}
+.manage-delete-confirm.hidden{display:none;}
 
 /* gauge for Z direction */
 .gauge{
@@ -779,6 +1075,56 @@ body{
 .modal p{font-size:14px;color:var(--text-dim);margin-bottom:20px;line-height:1.5;}
 .modal .btn-row{padding-top:0;}
 
+.info-btn{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--bg-card);
+  border:1px solid var(--line);
+  color:var(--text-dim);
+  font-size:15px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;cursor:pointer;
+}
+.info-btn.hidden{display:none;}
+
+.field-error{
+  font-size:12px;color:var(--red);
+  margin-top:6px;line-height:1.4;
+}
+.rpm-range-warning{
+  background:rgba(242,169,0,0.08);
+  border:1px solid var(--amber-dim);
+  border-radius:10px;
+  padding:12px 16px;
+  font-size:13px;
+  color:var(--amber);
+  text-align:center;
+  margin-bottom:16px;
+  line-height:1.45;
+}
+
+.math-trace-section{margin-bottom:22px;}
+.math-trace-section:last-of-type{margin-bottom:0;}
+.math-trace-section h4{
+  font-family:var(--font-display);
+  font-size:14px;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+  color:var(--amber);
+  margin-bottom:8px;
+}
+.math-trace-section p{
+  font-size:13px;
+  color:var(--text-dim);
+  line-height:1.55;
+  margin-bottom:6px;
+}
+.math-trace-section p:last-child{margin-bottom:0;}
+.math-trace-section code{
+  font-family:var(--font-num);
+  font-size:12px;
+  color:var(--text);
+}
+
 /* responsive: small phones */
 @media (max-width:340px){
   .home-header h1{font-size:28px;}
@@ -793,9 +1139,10 @@ body{
   <div class="topbar">
     <div class="back hidden" id="backBtn">‹</div>
     <div style="flex:1;">
-      <h1 id="topTitle">Custom Shop Calculators</h1>
+      <h1 id="topTitle">SHOP CALCULATORS</h1>
       <div class="sub" id="topSub">Machinist Tools</div>
     </div>
+    <button type="button" class="info-btn hidden" id="mathInfoBtn" onclick="openMathTraceModal()" title="Formula reference" aria-label="Formula reference">ℹ</button>
     <div class="hist-btn hidden" id="histBtn" title="History">
       <i class="hist-icon"></i>
     </div>
@@ -812,6 +1159,7 @@ body{
         </div>
         <div class="chev">›</div>
       </div>
+      <div class="saved-entries-banner hidden" id="savedEntriesBanner" onclick="openSavedEntriesFromHome()">Search for Saved Entries</div>
       <div class="tool-card" onclick="nav('taper')">
         <div class="num">1</div>
         <div class="body">
@@ -845,11 +1193,12 @@ body{
         <div class="chev">›</div>
       </div>
     </div>
-    <div class="footer-note">v1.1 · Works offline · Add to Home Screen for app mode</div>
+    <div class="footer-note">v1.2 · Works offline · For Reference Only</div>
   </div>
 
   <!-- TOOL 1: TAPER -->
   <div class="screen" id="screen-taper">
+    <div class="steps"><div class="dot"></div><div class="dot"></div></div>
     <div class="field">
       <label>Taper Angle (Per Side)</label>
       <div class="input-wrap">
@@ -879,6 +1228,7 @@ body{
 
   <!-- TOOL 1 RESULTS -->
   <div class="screen" id="screen-taper-result">
+    <div class="steps"><div class="dot"></div><div class="dot"></div></div>
     <div class="result-hero" id="taperResultHero">
       <div class="label">Z-Axis Move</div>
       <div class="value"><span id="taperZValue">0.0000</span><span class="unit">in</span></div>
@@ -904,20 +1254,25 @@ body{
         <div class="label">Target Ø</div>
         <div class="value" id="taperOutTarget">0.0000<span class="unit">in</span></div>
       </div>
-      <div class="result-card full">
+      <div class="result-card">
         <div class="label">Diameter Change</div>
         <div class="value" id="taperOutDiaChange">0.0000<span class="unit">in</span></div>
+      </div>
+      <div class="result-card">
+        <div class="label">Taper Angle</div>
+        <div class="value" id="taperOutAngle">0.000<span class="unit">°/side</span></div>
       </div>
     </div>
     <button class="pin-result-btn" id="taperPinBtn" onclick="togglePinCurrent('taper')">Pin This Result</button>
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="nav('taper')">Edit Values</button>
-      <button class="btn btn-primary" onclick="nav('home')">Close</button>
+      <button class="btn btn-secondary" onclick="editFromResult('taper','taper')">Edit Values</button>
+      <button class="btn btn-primary" onclick="closeFromResult()">Close</button>
     </div>
   </div>
 
   <!-- TOOL 2: DRILL -->
   <div class="screen" id="screen-drill">
+    <div class="steps"><div class="dot"></div><div class="dot"></div></div>
     <div class="field">
       <label>Drill Diameter</label>
       <div class="input-wrap">
@@ -948,6 +1303,7 @@ body{
 
   <!-- TOOL 2 RESULTS -->
   <div class="screen" id="screen-drill-result">
+    <div class="steps"><div class="dot"></div><div class="dot"></div></div>
     <div class="result-hero">
       <div class="label">Drill Tip Length</div>
       <div class="value"><span id="drillTipValue">0.0000</span><span class="unit">in</span></div>
@@ -964,15 +1320,15 @@ body{
     </div>
     <button class="pin-result-btn" id="drillPinBtn" onclick="togglePinCurrent('drill')">Pin This Result</button>
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="nav('drill')">Edit Values</button>
-      <button class="btn btn-primary" onclick="nav('home')">Close</button>
+      <button class="btn btn-secondary" onclick="editFromResult('drill','drill')">Edit Values</button>
+      <button class="btn btn-primary" onclick="closeFromResult()">Close</button>
     </div>
   </div>
 
   <!-- TOOL 3: XY STEP 1 -->
   <div class="screen" id="screen-xy1">
     <div class="steps">
-      <div class="dot current"></div>
+      <div class="dot"></div>
       <div class="dot"></div>
       <div class="dot"></div>
     </div>
@@ -996,8 +1352,8 @@ body{
   <!-- TOOL 3 STEP 2 -->
   <div class="screen" id="screen-xy2">
     <div class="steps">
-      <div class="dot done"></div>
-      <div class="dot current"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
       <div class="dot"></div>
     </div>
     <div class="instruction-card">
@@ -1027,22 +1383,26 @@ body{
   <!-- TOOL 3 RESULTS -->
   <div class="screen" id="screen-xy3">
     <div class="steps">
-      <div class="dot done"></div>
-      <div class="dot done"></div>
-      <div class="dot current"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
     </div>
     <div class="result-grid">
       <div class="result-card full">
         <div class="label">Hole Diameter Used</div>
         <div class="value" id="xyOutDia">0.0000<span class="unit">in</span></div>
       </div>
-      <div class="result-card">
-        <div class="label">X − r</div>
-        <div class="value" id="xyOutX">0.0000<span class="unit">in</span></div>
+    </div>
+    <div class="xy-result-chips">
+      <div class="list-chip eq">
+        <span class="ck">X-POSITION − RADIUS</span>
+        <span class="ceq" id="xyChipXEq">0.0000 − 0.0000</span>
+        <span class="cv" id="xyChipXVal">0.0000</span>
       </div>
-      <div class="result-card">
-        <div class="label">Y − r</div>
-        <div class="value" id="xyOutY">0.0000<span class="unit">in</span></div>
+      <div class="list-chip eq">
+        <span class="ck">Y-POSITION − RADIUS</span>
+        <span class="ceq" id="xyChipYEq">0.0000 − 0.0000</span>
+        <span class="cv" id="xyChipYVal">0.0000</span>
       </div>
     </div>
     <div class="note-banner">
@@ -1051,13 +1411,14 @@ body{
     </div>
     <button class="pin-result-btn" id="xyPinBtn" onclick="togglePinCurrent('xy')">Pin This Result</button>
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="nav('xy1')">Edit Values</button>
-      <button class="btn btn-primary" onclick="nav('home')">Close</button>
+      <button class="btn btn-secondary" onclick="editFromResult('xy1','xy')">Edit Values</button>
+      <button class="btn btn-primary" onclick="closeFromResult()">Close</button>
     </div>
   </div>
 
   <!-- TOOL 4: RPM/FEED INPUT -->
   <div class="screen" id="screen-rpm">
+    <div class="steps"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
     <div class="field">
       <label>Surface Speed (SFPM)</label>
       <div class="input-wrap">
@@ -1071,7 +1432,7 @@ body{
         <input type="number" inputmode="decimal" id="rpmDia" enterkeyhint="go" placeholder="0.0000" step="any">
         <span class="unit">in</span>
       </div>
-      <div class="hint">RPM = (SFPM ÷ Cutter Diameter) × 3.82</div>
+      <div class="hint">RPM = (SFM × 12) / (π × D)</div>
     </div>
     <div class="btn-row">
       <button class="btn btn-primary" onclick="calcRpm()">Calculate</button>
@@ -1080,6 +1441,7 @@ body{
 
   <!-- TOOL 4 RESULTS (tabbed: RPM / Feed) -->
   <div class="screen" id="screen-rpm-result">
+    <div class="steps"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
     <div class="tab-row">
       <button class="tab-btn active" id="rpmTabBtn" onclick="showRpmTab('rpm')">RPM</button>
       <button class="tab-btn" id="feedTabBtn" onclick="showRpmTab('feed')" disabled>Feed</button>
@@ -1091,6 +1453,7 @@ body{
         <div class="label">Spindle Speed</div>
         <div class="value"><span id="rpmValue">0</span><span class="unit">RPM</span></div>
       </div>
+      <div id="rpmRangeWarning" class="rpm-range-warning hidden">RPM is outside conventional operating range, confirm values.</div>
       <div class="result-grid">
         <div class="result-card">
           <div class="label">Surface Speed</div>
@@ -1103,8 +1466,8 @@ body{
       </div>
       <button class="pin-result-btn" id="rpmPinBtn" data-pin-module="rpm" onclick="togglePinCurrent('rpm')">Pin This Result</button>
       <div class="btn-row">
-        <button class="btn btn-secondary" onclick="nav('rpm')">Edit Values</button>
-        <button class="btn btn-primary" onclick="nav('home')">Close</button>
+        <button class="btn btn-secondary" onclick="editFromResult('rpm','rpm')">Edit Values</button>
+        <button class="btn btn-primary" onclick="closeFromResult()">Close</button>
       </div>
     </div>
 
@@ -1129,28 +1492,32 @@ body{
       <div class="btn-row" id="feedCalcRow">
         <button class="btn btn-primary" onclick="calcFeed()">Calculate Feed</button>
       </div>
+    </div>
+  </div>
 
-      <div id="feedResultBlock" class="hidden">
-        <div class="result-hero">
-          <div class="label">Feed Rate</div>
-          <div class="value"><span id="feedValue">0.0000</span><span class="unit">in/min</span></div>
-        </div>
-        <div class="result-grid">
-          <div class="result-card">
-            <div class="label">Chip Load</div>
-            <div class="value" id="feedOutChipLoad">0.0000<span class="unit">in</span></div>
-          </div>
-          <div class="result-card">
-            <div class="label">Flutes</div>
-            <div class="value" id="feedOutFlutes">0</div>
-          </div>
-        </div>
-        <button class="pin-result-btn" id="rpmFeedPinBtn" data-pin-module="rpm" onclick="togglePinCurrent('rpm')">Pin This Result</button>
-        <div class="btn-row">
-          <button class="btn btn-secondary" onclick="nav('rpm')">Edit Values</button>
-          <button class="btn btn-primary" onclick="nav('home')">Close</button>
-        </div>
+  <!-- TOOL 4 FEED RESULTS -->
+  <div class="screen" id="screen-rpm-feed-result">
+    <div class="steps"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div class="result-hero">
+      <div class="label">Feed Rate</div>
+      <div class="value"><span id="feedResultValue">0.0000</span></div>
+      <div class="lc-hero-label" style="margin-top:10px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);font-weight:700;">IPM</div>
+    </div>
+    <div class="result-grid">
+      <div class="result-card">
+        <div class="label">Chip Load Per Tooth</div>
+        <div class="value" id="feedResultChipLoad">0.0000<span class="unit">in</span></div>
       </div>
+      <div class="result-card">
+        <div class="label">Number of Flutes</div>
+        <div class="value" id="feedResultFlutes">0</div>
+      </div>
+    </div>
+    <div class="feed-rpm-note">Using <span id="feedResultRpmRef">0</span> RPM</div>
+    <button class="pin-result-btn" id="rpmFeedResultPinBtn" data-pin-module="rpm" onclick="togglePinCurrent('rpm')">Pin This Result</button>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="editFromFeedResult()">Edit Values</button>
+      <button class="btn btn-primary" onclick="closeFromResult()">Close</button>
     </div>
   </div>
 
@@ -1162,7 +1529,13 @@ body{
   <!-- PINNED LIST SCREEN -->
   <div class="screen" id="screen-list">
     <div class="list-toolbar" id="listToolbar">
-      <button class="clear-all-btn" onclick="confirmClearAll()">Clear All</button>
+      <div class="list-search-wrap" id="listSearchWrap">
+        <input type="text" id="listSearchInput" placeholder="Search..." autocomplete="off" spellcheck="false">
+        <div class="list-search-dropdown hidden" id="listSearchDropdown"></div>
+        <div class="list-search-msg hidden" id="listSearchMsg"></div>
+      </div>
+      <button class="clear-all-btn" id="clearAllBtn" onclick="confirmClearAll()">Clear All</button>
+      <button class="save-snapshot-btn hidden" id="saveSnapshotBtn" onclick="saveSelectedSnapshot()">Save</button>
     </div>
     <div class="entry-list" id="listEntries"></div>
   </div>
@@ -1177,6 +1550,65 @@ body{
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="closeRemoveModal()">Cancel</button>
       <button class="btn btn-danger" id="removeConfirmBtn">Remove</button>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGE SAVED ENTRIES MODAL -->
+<div class="modal-backdrop" id="manageEntriesModalBackdrop">
+  <div class="modal manage-entries-modal">
+    <h3>Manage Saved Entries</h3>
+    <div id="manageEntriesMain">
+      <div class="manage-entries-actions">
+        <button class="btn btn-danger" id="manageDeleteBtn" onclick="startManageDelete()" disabled>Delete Selected</button>
+      </div>
+      <div class="manage-entries-list" id="manageEntriesList"></div>
+    </div>
+    <div class="manage-delete-confirm hidden" id="manageDeleteConfirm">
+      <p id="manageDeleteConfirmText"></p>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="cancelManageDelete()">Cancel</button>
+        <button class="btn btn-danger" onclick="confirmManageDelete()">Confirm</button>
+      </div>
+    </div>
+    <div class="list-search-msg hidden" id="manageEntriesMsg"></div>
+    <div class="manage-entries-footer">
+      <button class="btn btn-secondary" onclick="exportSavedSnapshots()">Export</button>
+      <button class="btn btn-secondary" onclick="triggerImportSavedSnapshots()">Import</button>
+      <input type="file" id="manageEntriesImportInput" accept=".json,application/json" class="hidden" onchange="handleImportSavedSnapshots(this)">
+      <button class="btn btn-secondary" onclick="closeManageEntriesModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- MATH TRACEABILITY MODAL -->
+<div class="modal-backdrop" id="mathTraceModalBackdrop">
+  <div class="modal">
+    <h3>Formula Reference</h3>
+    <div class="math-trace-section">
+      <h4>RPM / Feed</h4>
+      <p><strong>Formula:</strong> RPM = (SFM × 12) / (π × D)</p>
+      <p><strong>Feed Formula:</strong> Feed Rate = Chip Load Per Tooth × Number of Flutes × RPM</p>
+      <p><strong>Reference:</strong> Machinery's Handbook — Speed and Feed calculations (Industrial Press)</p>
+      <p><strong>Code:</strong> <code>calcRpm()</code>, <code>calcFeed()</code> in index.html</p>
+    </div>
+    <div class="math-trace-section">
+      <h4>Tapered Hole Offset</h4>
+      <p><strong>Formula:</strong> Radius Change = (Target Ø − Current Ø) / 2</p>
+      <p><strong>Formula:</strong> Z Move = |Radius Change| / tan(Taper Angle per Side)</p>
+      <p><strong>Note:</strong> Taper angle is entered in degrees.</p>
+      <p><strong>Convention:</strong> Haas vertical — Z− (down) increases hole diameter when radius change is positive.</p>
+      <p><strong>Reference:</strong> Machinery's Handbook — Tapers and Taper Calculations (Industrial Press)</p>
+      <p><strong>Code:</strong> <code>calcTaper()</code> in index.html</p>
+    </div>
+    <div class="math-trace-section">
+      <h4>X/Y Hole Location</h4>
+      <p><strong>Formula:</strong> Edge Position = Nominal Position − (Hole Diameter / 2)</p>
+      <p><strong>Reference:</strong> Machinery's Handbook — Jig Boring and Hole Location (Industrial Press)</p>
+      <p><strong>Code:</strong> <code>xyStep3()</code> in index.html</p>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeMathTraceModal()">Close</button>
     </div>
   </div>
 </div>
@@ -1198,11 +1630,12 @@ function loadStore(){
           xy: parsed.history?.xy||[],
           rpm: parsed.history?.rpm||[]
         },
-        pinned: parsed.pinned||[]
+        pinned: parsed.pinned||[],
+        pinnedLayout: parsed.pinnedLayout || null
       };
     }
   }catch(e){}
-  return { history:{taper:[],drill:[],xy:[],rpm:[]}, pinned:[] };
+  return { history:{taper:[],drill:[],xy:[],rpm:[]}, pinned:[], pinnedLayout:null };
 }
 function saveStore(){
   try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }catch(e){}
@@ -1228,7 +1661,7 @@ function addHistory(module, record){
 
 // ===== Navigation =====
 const titles = {
-  home: ['Custom Shop Calculators','Machinist Tools'],
+  home: ['SHOP CALCULATORS','Machinist Tools'],
   taper: ['Tapered Hole','Z-Offset Calculator'],
   'taper-result': ['Tapered Hole','Result'],
   drill: ['Drill Tip','Calculator'],
@@ -1238,6 +1671,7 @@ const titles = {
   xy3: ['X/Y Location','Result'],
   rpm: ['RPM / Feed','Spindle Speed Calculator'],
   'rpm-result': ['RPM / Feed','Result'],
+  'rpm-feed-result': ['RPM / Feed','Feed Result'],
   history: ['History','Last 100 Results'],
   list: ['Pinned List','Up to 8 Results'],
 };
@@ -1245,19 +1679,83 @@ const HIST_MODULE_FOR_SCREEN = {
   taper:'taper', 'taper-result':'taper',
   drill:'drill', 'drill-result':'drill',
   xy1:'xy', xy2:'xy', xy3:'xy',
-  rpm:'rpm', 'rpm-result':'rpm'
+  rpm:'rpm', 'rpm-result':'rpm', 'rpm-feed-result':'rpm'
 };
 
 let currentScreen = 'home';
 
+const STEP_SCREEN_CONFIG = {
+  taper: { stage: 0 },
+  'taper-result': { stage: 1 },
+  drill: { stage: 0 },
+  'drill-result': { stage: 1 },
+  xy1: { stage: 0 },
+  xy2: { stage: 1 },
+  xy3: { stage: 2 },
+  rpm: { stage: 0 },
+  'rpm-result': { stage: 1 },
+  'rpm-feed-result': { stage: 2 }
+};
+
+function updateStepDots(screenName){
+  const cfg = STEP_SCREEN_CONFIG[screenName];
+  if(!cfg) return;
+  const screen = document.getElementById('screen-'+screenName);
+  if(!screen) return;
+  const dots = screen.querySelectorAll('.steps .dot');
+  if(!dots.length) return;
+  dots.forEach((dot, i)=>{
+    dot.classList.remove('done', 'current');
+    if(i < cfg.stage) dot.classList.add('done');
+    else if(i === cfg.stage) dot.classList.add('current');
+  });
+}
+
+const FRESH_LAUNCH_FROM_HOME = ['taper','drill','xy1','rpm'];
+const FRESH_LAUNCH_FIELDS = {
+  taper: ['taperAngle','taperCurrent','taperTarget'],
+  drill: ['drillDia','drillAngle','drillDepth'],
+  xy1: ['xyDia','xyX','xyY'],
+  rpm: ['rpmSfpm','rpmDia','feedChipLoad','feedFlutes']
+};
+const FRESH_LAUNCH_MODULE = { taper:'taper', drill:'drill', xy1:'xy', rpm:'rpm' };
+
+function clearCalculatorForFreshLaunch(screen){
+  const fields = FRESH_LAUNCH_FIELDS[screen];
+  if(!fields) return;
+  fields.forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  if(screen === 'rpm'){
+    clearRpmFieldErrors();
+    clearFeedFieldErrors();
+    updateRpmRangeWarning(0);
+  }
+  const module = FRESH_LAUNCH_MODULE[screen];
+  if(module) lastResult[module] = null;
+  editingPinnedId = null;
+}
+
 function nav(name){
-  const RESULT_SCREENS = ['taper-result','drill-result','xy3','rpm-result'];
+  const RESULT_SCREENS = ['taper-result','drill-result','xy3','rpm-result','rpm-feed-result'];
   if(!RESULT_SCREENS.includes(name)){
     resultBackOverride = null;
+  }
+  if(currentScreen === 'list' && name !== 'list'){
+    clearPinnedSelection();
+    closeListSearchDropdown();
+  }
+  if(currentScreen === 'home' && FRESH_LAUNCH_FROM_HOME.includes(name)){
+    clearCalculatorForFreshLaunch(name);
+  }
+  if(name === 'home' || name === 'list' || name === 'history'){
+    editingPinnedId = null;
   }
   currentScreen = name;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
+  updateStepDots(name);
   const t = titles[name];
   document.getElementById('topTitle').textContent = t[0];
   document.getElementById('topSub').textContent = t[1];
@@ -1273,24 +1771,42 @@ function nav(name){
     histBtn.classList.add('hidden');
   }
 
+  document.getElementById('mathInfoBtn').classList.toggle('hidden', name !== 'home');
   if(name === 'home') refreshHomeListCard();
-  if(name === 'list') renderListScreen();
+  if(name === 'list'){
+    renderListScreen();
+    if(openListSearchOnArrival){
+      openListSearchOnArrival = false;
+      setTimeout(()=>{
+        const inp = document.getElementById('listSearchInput');
+        if(inp){
+          inp.focus();
+          openListSearchRecall();
+        }
+      }, 0);
+    }
+  }
 
   window.scrollTo(0,0);
 }
 
 function backFrom(name){
-  if((name==='taper-result' || name==='drill-result' || name==='xy3' || name==='rpm-result') && resultBackOverride){
+  if((name==='taper-result' || name==='drill-result' || name==='xy3' || name==='rpm-result' || name==='rpm-feed-result') && resultBackOverride){
     const target = resultBackOverride;
     resultBackOverride = null;
     nav(target);
+    return;
+  }
+  const resultListOrHome = ['taper-result','drill-result','xy3','rpm-result','rpm-feed-result'];
+  if(resultListOrHome.includes(name)){
+    nav(store.pinned.length > 0 ? 'list' : 'home');
     return;
   }
   const map = {
     taper:'home', 'taper-result':'taper',
     drill:'home', 'drill-result':'drill',
     xy1:'home', xy2:'xy1', xy3:'xy2',
-    rpm:'home', 'rpm-result':'rpm',
+    rpm:'home', 'rpm-result':'rpm', 'rpm-feed-result':'rpm-result',
     history: historyReturnScreen || 'home',
     list:'home'
   };
@@ -1303,6 +1819,7 @@ function renderTaperResult(r){
   document.getElementById('taperOutCurrent').innerHTML = r.current.toFixed(4)+'<span class="unit">in</span>';
   document.getElementById('taperOutTarget').innerHTML = r.target.toFixed(4)+'<span class="unit">in</span>';
   document.getElementById('taperOutDiaChange').innerHTML = (r.target-r.current).toFixed(4)+'<span class="unit">in</span>';
+  document.getElementById('taperOutAngle').innerHTML = Number(r.angle).toFixed(3)+'<span class="unit">°/side</span>';
 
   const hero = document.getElementById('taperResultHero');
   const dirEl = document.getElementById('taperDirection');
@@ -1343,9 +1860,12 @@ function renderDrillResult(r){
 }
 
 function renderXyResult(r){
+  const radius = r.dia / 2;
   document.getElementById('xyOutDia').innerHTML = r.dia.toFixed(4)+'<span class="unit">in</span>';
-  document.getElementById('xyOutX').innerHTML = r.xOut.toFixed(4)+'<span class="unit">in</span>';
-  document.getElementById('xyOutY').innerHTML = r.yOut.toFixed(4)+'<span class="unit">in</span>';
+  document.getElementById('xyChipXEq').textContent = r.x.toFixed(4)+' − '+radius.toFixed(4);
+  document.getElementById('xyChipXVal').textContent = r.xOut.toFixed(4);
+  document.getElementById('xyChipYEq').textContent = r.y.toFixed(4)+' − '+radius.toFixed(4);
+  document.getElementById('xyChipYVal').textContent = r.yOut.toFixed(4);
   lastResult.xy = r;
   refreshPinButton('xy');
 }
@@ -1356,30 +1876,28 @@ function renderRpmResult(r){
   document.getElementById('rpmOutDia').innerHTML = r.dia.toFixed(4)+'<span class="unit">in</span>';
 
   const feedTabBtn = document.getElementById('feedTabBtn');
-  const feedResultBlock = document.getElementById('feedResultBlock');
-  const feedCalcRow = document.getElementById('feedCalcRow');
   document.getElementById('feedRpmRef').textContent = Math.round(r.rpm);
-
-  // Feed tab is reachable as soon as we have an RPM value — it's where
-  // Chip Load / Flutes get entered. Only the result display inside the
-  // tab depends on whether Feed has actually been calculated yet.
+  updateRpmRangeWarning(r.rpm);
   feedTabBtn.disabled = false;
-
   if(r.hasFeed){
-    document.getElementById('feedValue').textContent = r.feed.toFixed(4);
-    document.getElementById('feedOutChipLoad').innerHTML = r.chipLoad.toFixed(4)+'<span class="unit">in</span>';
-    document.getElementById('feedOutFlutes').textContent = r.flutes;
     document.getElementById('feedChipLoad').value = r.chipLoad;
     document.getElementById('feedFlutes').value = r.flutes;
-    feedResultBlock.classList.remove('hidden');
-    feedCalcRow.classList.add('hidden');
-  } else {
-    feedResultBlock.classList.add('hidden');
-    feedCalcRow.classList.remove('hidden');
+  } else if(!isEditingHasFeedPinnedEntry()){
     document.getElementById('feedChipLoad').value = '';
     document.getElementById('feedFlutes').value = '';
   }
   showRpmTab('rpm');
+  lastResult.rpm = r;
+  refreshPinButton('rpm');
+}
+
+function renderFeedResult(r){
+  document.getElementById('feedResultValue').textContent = r.feed.toFixed(1);
+  document.getElementById('feedResultChipLoad').innerHTML = r.chipLoad.toFixed(4)+'<span class="unit">in</span>';
+  document.getElementById('feedResultFlutes').textContent = r.flutes;
+  document.getElementById('feedResultRpmRef').textContent = Math.round(r.rpm);
+  document.getElementById('feedChipLoad').value = r.chipLoad;
+  document.getElementById('feedFlutes').value = r.flutes;
   lastResult.rpm = r;
   refreshPinButton('rpm');
 }
@@ -1403,6 +1921,7 @@ function calcTaper(){
   const record = { angle, current, target, zMove, direction };
   renderTaperResult(record);
   addHistory('taper', record);
+  applyPinnedEditOnResultLoad('taper');
   nav('taper-result');
 }
 
@@ -1425,6 +1944,7 @@ function calcDrill(){
   const record = { dia, angle, hasDepth, depth: hasDepth?depth:null, tip: tipLength, total: hasDepth?(tipLength+depth):null };
   renderDrillResult(record);
   addHistory('drill', record);
+  applyPinnedEditOnResultLoad('drill');
   nav('drill-result');
 }
 
@@ -1451,6 +1971,7 @@ function xyStep3(){
   const record = { dia, x, y, xOut: x-r, yOut: y-r };
   renderXyResult(record);
   addHistory('xy', record);
+  applyPinnedEditOnResultLoad('xy');
   nav('xy3');
 }
 
@@ -1458,25 +1979,36 @@ function xyStep3(){
 function calcRpm(){
   const sfpm = parseFloat(document.getElementById('rpmSfpm').value);
   const dia = parseFloat(document.getElementById('rpmDia').value);
+  clearRpmFieldErrors();
 
-  if(!validNum(sfpm) || sfpm<=0 || !validNum(dia) || dia<=0){
-    flashInvalid(['rpmSfpm','rpmDia']);
+  if(!validNum(sfpm) || sfpm<=0){
+    flashInvalid(['rpmSfpm']);
+    return;
+  }
+  if(!validNum(dia) || dia <= 0){
+    showFieldError('rpmDia', 'Diameter must be greater than zero.');
     return;
   }
 
-  const rpm = (sfpm / dia) * 3.82;
+  const rpm = (sfpm * 12) / (Math.PI * dia);
   const record = { sfpm, dia, rpm, hasFeed:false, chipLoad:null, flutes:null, feed:null };
   renderRpmResult(record);
   addHistory('rpm', record);
+  applyPinnedEditOnResultLoad('rpm');
   nav('rpm-result');
 }
 
 function calcFeed(){
   const chipLoad = parseFloat(document.getElementById('feedChipLoad').value);
   const flutes = parseFloat(document.getElementById('feedFlutes').value);
+  clearFeedFieldErrors();
 
-  if(!validNum(chipLoad) || chipLoad<=0 || !validNum(flutes) || flutes<=0){
-    flashInvalid(['feedChipLoad','feedFlutes']);
+  if(!validNum(chipLoad) || chipLoad<=0){
+    flashInvalid(['feedChipLoad']);
+    return;
+  }
+  if(!validNum(flutes) || flutes < 1 || flutes !== Math.floor(flutes)){
+    showFieldError('feedFlutes', 'Number of flutes must be at least 1.');
     return;
   }
 
@@ -1485,9 +2017,10 @@ function calcFeed(){
 
   const feed = chipLoad * flutes * base.rpm;
   const record = Object.assign({}, base, { hasFeed:true, chipLoad, flutes, feed });
-  renderRpmResult(record);
   addHistory('rpm', record);
-  showRpmTab('feed');
+  if(isEditingPinnedEntry()) updatePinnedEntryInPlace('rpm');
+  renderFeedResult(record);
+  nav('rpm-feed-result');
 }
 
 function showRpmTab(tab){
@@ -1506,6 +2039,38 @@ function showRpmTab(tab){
 
 // ===== Validation helpers =====
 function validNum(n){ return typeof n === 'number' && !isNaN(n) && isFinite(n); }
+function showFieldError(fieldId, message){
+  const el = document.getElementById(fieldId);
+  const field = el.closest('.field');
+  let err = field.querySelector('.field-error');
+  if(!err){
+    err = document.createElement('div');
+    err.className = 'field-error';
+    field.appendChild(err);
+  }
+  err.textContent = message;
+  el.closest('.input-wrap').classList.add('invalid');
+}
+function clearFieldError(fieldId){
+  const el = document.getElementById(fieldId);
+  const field = el.closest('.field');
+  const err = field.querySelector('.field-error');
+  if(err) err.remove();
+  el.closest('.input-wrap').classList.remove('invalid');
+}
+function clearRpmFieldErrors(){
+  clearFieldError('rpmSfpm');
+  clearFieldError('rpmDia');
+}
+function clearFeedFieldErrors(){
+  clearFieldError('feedChipLoad');
+  clearFieldError('feedFlutes');
+}
+function updateRpmRangeWarning(rpm){
+  const warn = document.getElementById('rpmRangeWarning');
+  if(!warn) return;
+  warn.classList.toggle('hidden', !(rpm <= 0 || rpm >= 50000));
+}
 function flashInvalid(ids){
   ids.forEach(id=>{
     const el = document.getElementById(id);
@@ -1541,6 +2106,7 @@ FIELD_CHAINS.forEach(chain=>{
   });
 });
 document.querySelectorAll('.input-wrap input').forEach(inp=>{
+  inp.addEventListener('focus', ()=>{ if(inp.select) inp.select(); });
   inp.addEventListener('keydown', (e)=>{
     if(e.key === 'Enter'){
       e.preventDefault();
@@ -1563,10 +2129,56 @@ const MAX_PINNED = 8;
 function isPinned(id){
   return store.pinned.some(p=>p.id===id);
 }
+function isEditingPinnedEntry(){
+  return editingPinnedId !== null && isPinned(editingPinnedId);
+}
+function isEditingHasFeedPinnedEntry(){
+  if(!isEditingPinnedEntry()) return false;
+  const p = store.pinned.find(e=>e.id===editingPinnedId);
+  return !!(p && p.hasFeed);
+}
+function seedFeedInputsFromPinnedEdit(){
+  if(!isEditingHasFeedPinnedEntry()) return;
+  const p = store.pinned.find(e=>e.id===editingPinnedId);
+  if(!p) return;
+  if(p.chipLoad != null) document.getElementById('feedChipLoad').value = p.chipLoad;
+  if(p.flutes != null) document.getElementById('feedFlutes').value = p.flutes;
+}
+function updatePinnedEntryInPlace(module){
+  const r = lastResult[module];
+  if(!r || !isEditingPinnedEntry()) return false;
+  const idx = store.pinned.findIndex(p=>p.id===editingPinnedId);
+  if(idx < 0){
+    editingPinnedId = null;
+    return false;
+  }
+  const pinnedId = editingPinnedId;
+  Object.assign(store.pinned[idx], r, {module, id: pinnedId});
+  saveStore();
+  editingPinnedId = null;
+  r.id = pinnedId;
+  refreshHomeListCard();
+  return true;
+}
+function applyPinnedEditOnResultLoad(module){
+  if(module === 'rpm' && isEditingHasFeedPinnedEntry() && !lastResult[module]?.hasFeed){
+    seedFeedInputsFromPinnedEdit();
+    refreshPinButton(module);
+    return;
+  }
+  updatePinnedEntryInPlace(module);
+  refreshPinButton(module);
+}
 function refreshPinButton(module){
   const r = lastResult[module];
   if(!r) return;
-  const pinned = r.id && isPinned(r.id);
+  if(editingPinnedId !== null && !isPinned(editingPinnedId)){
+    editingPinnedId = null;
+  }
+  let pinned = isEditingPinnedEntry() || (r.id && isPinned(r.id));
+  if(module === 'rpm' && isEditingHasFeedPinnedEntry() && !r.hasFeed){
+    pinned = false;
+  }
   const btns = document.querySelectorAll('[data-pin-module="'+module+'"], #'+module+'PinBtn');
   btns.forEach(btn=>{
     btn.textContent = pinned ? 'Pinned ✓' : 'Pin This Result';
@@ -1575,9 +2187,12 @@ function refreshPinButton(module){
 }
 function togglePinCurrent(module){
   const r = lastResult[module];
-  if(!r || !r.id) return;
+  if(!r) return;
+
+  if(!r.id) return;
   if(isPinned(r.id)){
     store.pinned = store.pinned.filter(p=>p.id!==r.id);
+    removeIdFromPinnedLayout(r.id);
     saveStore();
     refreshPinButton(module);
     refreshHomeListCard();
@@ -1588,6 +2203,7 @@ function togglePinCurrent(module){
     return;
   }
   store.pinned.push(Object.assign({module}, r));
+  addPinnedIdToLayout(r.id);
   saveStore();
   refreshPinButton(module);
   refreshHomeListCard();
@@ -1597,12 +2213,14 @@ function pinFromHistory(module, id){
   if(!r) return;
   if(isPinned(id)){
     store.pinned = store.pinned.filter(p=>p.id!==id);
+    removeIdFromPinnedLayout(id);
   } else {
     if(store.pinned.length >= MAX_PINNED){
       alert('Pinned List is full (8 max). Remove one from the List before pinning another.');
       return;
     }
     store.pinned.push(Object.assign({module}, r));
+    addPinnedIdToLayout(id);
   }
   saveStore();
   renderHistoryScreen(module);
@@ -1618,11 +2236,81 @@ function refreshHomeListCard(){
   } else {
     card.classList.add('hidden');
   }
+  updateHomeBanner();
+}
+
+function updateHomeBanner(){
+  const banner = document.getElementById('savedEntriesBanner');
+  if(!banner) return;
+  const show = loadSavedSnapshots().length > 0 && store.pinned.length === 0;
+  banner.classList.toggle('hidden', !show);
+}
+
+function openSavedEntriesFromHome(){
+  openListSearchOnArrival = true;
+  nav('list');
 }
 
 // ===== History screen =====
 let historyReturnScreen = 'home';
 let resultBackOverride = null; // when set, back from a result screen goes here instead of the default
+let editingPinnedId = null; // pinned entry id being edited in place (set on Edit from list-backed result)
+
+function closeFromResult(){
+  nav(store.pinned.length > 0 ? 'list' : 'home');
+}
+
+function resetEditSessionState(module){
+  editingPinnedId = null;
+  lastResult[module] = null;
+}
+
+function seedInputsForEdit(module, r){
+  if(!r) return;
+  if(module === 'taper'){
+    document.getElementById('taperAngle').value = r.angle;
+    document.getElementById('taperCurrent').value = r.current;
+    document.getElementById('taperTarget').value = r.target;
+  } else if(module === 'drill'){
+    document.getElementById('drillDia').value = r.dia;
+    document.getElementById('drillAngle').value = r.angle;
+    document.getElementById('drillDepth').value = r.hasDepth ? r.depth : '';
+  } else if(module === 'xy'){
+    document.getElementById('xyDia').value = r.dia;
+    document.getElementById('xyX').value = r.x;
+    document.getElementById('xyY').value = r.y;
+  } else if(module === 'rpm'){
+    document.getElementById('rpmSfpm').value = r.sfpm;
+    document.getElementById('rpmDia').value = r.dia;
+    if(r.hasFeed){
+      document.getElementById('feedChipLoad').value = r.chipLoad;
+      document.getElementById('feedFlutes').value = r.flutes;
+    }
+  }
+}
+
+function editFromResult(screen, module){
+  const r = lastResult[module];
+  const pinnedId = (r && r.id && isPinned(r.id)) ? r.id : null;
+  resetEditSessionState(module);
+  if(pinnedId) editingPinnedId = pinnedId;
+  seedInputsForEdit(module, r);
+  nav(screen);
+}
+
+function editFromFeedResult(){
+  const r = lastResult.rpm;
+  const pinnedId = (r && r.id && isPinned(r.id)) ? r.id : null;
+  resetEditSessionState('rpm');
+  if(pinnedId) editingPinnedId = pinnedId;
+  if(r){
+    document.getElementById('rpmSfpm').value = r.sfpm;
+    document.getElementById('rpmDia').value = r.dia;
+    document.getElementById('feedChipLoad').value = r.chipLoad;
+    document.getElementById('feedFlutes').value = r.flutes;
+  }
+  nav('rpm');
+}
 const MODULE_LABEL = { taper:'Tapered Hole', drill:'Drill Tip', xy:'X/Y Location', rpm:'RPM / Feed' };
 const RESULT_SCREEN = { taper:'taper-result', drill:'drill-result', xy:'xy3', rpm:'rpm-result' };
 
@@ -1649,7 +2337,7 @@ function summaryFor(module, r){
   }
   if(module==='rpm'){
     let s = Math.round(r.rpm)+' RPM @ '+r.sfpm.toFixed(1)+' SFPM · Ø'+r.dia.toFixed(4)+'"';
-    if(r.hasFeed) s += ' · Feed '+r.feed.toFixed(4)+' in/min';
+    if(r.hasFeed) s += ' · Feed '+r.feed.toFixed(1)+' IPM';
     return s;
   }
   return '';
@@ -1675,12 +2363,23 @@ function renderHistoryScreen(module){
 }
 
 function restoreFromHistory(module, id, fromList){
-  const r = store.history[module].find(h=>h.id===id) || store.pinned.find(p=>p.id===id);
+  editingPinnedId = null;
+  const r = fromList
+    ? (store.pinned.find(p=>p.id===id) || store.history[module].find(h=>h.id===id))
+    : (store.history[module].find(h=>h.id===id) || store.pinned.find(p=>p.id===id));
   if(!r) return;
   if(module==='taper') renderTaperResult(r);
   if(module==='drill') renderDrillResult(r);
   if(module==='xy') renderXyResult(r);
-  if(module==='rpm') renderRpmResult(r);
+  if(module==='rpm'){
+    if(r.hasFeed){
+      renderFeedResult(r);
+      resultBackOverride = fromList ? 'list' : null;
+      nav('rpm-feed-result');
+      return;
+    }
+    renderRpmResult(r);
+  }
   resultBackOverride = fromList ? 'list' : null;
   nav(RESULT_SCREEN[module]);
 }
@@ -1688,6 +2387,498 @@ function restoreFromHistory(module, id, fromList){
 // ===== Pinned List screen =====
 const MODULE_ACCENT = { taper:'amber', drill:'blue', xy:'green', rpm:'violet' };
 const MODULE_ICON = { taper:'◢', drill:'▽', xy:'⊹', rpm:'◉' };
+
+const SAVED_SNAPSHOTS_KEY = 'savedSnapshots';
+const SWIPE_LEFT_THRESHOLD = -70;
+const SWIPE_RIGHT_THRESHOLD = 70;
+let selectedPinnedIds = [];
+let listSearchRecallOpen = false;
+let listSearchMsgTimer = null;
+let openListSearchOnArrival = false;
+
+function loadSavedSnapshots(){
+  try{
+    const raw = localStorage.getItem(SAVED_SNAPSHOTS_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return [];
+}
+function saveSavedSnapshots(arr){
+  try{ localStorage.setItem(SAVED_SNAPSHOTS_KEY, JSON.stringify(arr)); }catch(e){}
+}
+function getPinnedById(id){
+  return store.pinned.find(p=>p.id===id);
+}
+function ensurePinnedLayout(){
+  const pinnedIds = new Set(store.pinned.map(p=>p.id));
+  if(!store.pinnedLayout || !store.pinnedLayout.length){
+    store.pinnedLayout = store.pinned.map(p=>({t:'id',id:p.id}));
+    return;
+  }
+  store.pinnedLayout = store.pinnedLayout.filter(x=>x.t==='sep' || (x.t==='id' && pinnedIds.has(x.id)));
+  const layoutIds = new Set(store.pinnedLayout.filter(x=>x.t==='id').map(x=>x.id));
+  const missing = store.pinned.filter(p=>!layoutIds.has(p.id));
+  if(missing.length){
+    const firstSep = store.pinnedLayout.findIndex(x=>x.t==='sep');
+    const items = missing.map(p=>({t:'id', id: p.id}));
+    if(firstSep === -1){
+      store.pinnedLayout.push(...items);
+    } else {
+      store.pinnedLayout.splice(firstSep, 0, ...items);
+    }
+  }
+}
+function addPinnedIdToLayout(id){
+  if(!store.pinnedLayout || !store.pinnedLayout.length){
+    store.pinnedLayout = store.pinned.map(p=>({t:'id',id:p.id}));
+    return;
+  }
+  if(store.pinnedLayout.some(x=>x.t==='id' && x.id===id)) return;
+  const firstSep = store.pinnedLayout.findIndex(x=>x.t==='sep');
+  if(firstSep === -1){
+    store.pinnedLayout.push({t:'id',id});
+  } else {
+    store.pinnedLayout.splice(firstSep, 0, {t:'id',id});
+  }
+}
+function removeIdFromPinnedLayout(id){
+  if(!store.pinnedLayout) return;
+  store.pinnedLayout = store.pinnedLayout.filter(x=>!(x.t==='id' && x.id===id));
+  cleanupOrphanedSeparators();
+}
+function cleanupOrphanedSeparators(){
+  if(!store.pinnedLayout || !store.pinnedLayout.length) return;
+  const cleaned = [];
+  for(let i = 0; i < store.pinnedLayout.length; i++){
+    const item = store.pinnedLayout[i];
+    if(item.t === 'sep'){
+      let hasEntry = false;
+      for(let j = i + 1; j < store.pinnedLayout.length; j++){
+        if(store.pinnedLayout[j].t === 'sep') break;
+        if(store.pinnedLayout[j].t === 'id'){ hasEntry = true; break; }
+      }
+      if(hasEntry) cleaned.push(item);
+    } else {
+      cleaned.push(item);
+    }
+  }
+  store.pinnedLayout = cleaned;
+}
+function persistPinnedOrderFromDom(){
+  const container = document.getElementById('listEntries');
+  if(!container) return;
+  const items = [];
+  Array.from(container.children).forEach(el=>{
+    if(el.classList.contains('list-snapshot-sep')){
+      items.push({t:'sep', label: el.getAttribute('data-label')||''});
+    } else if(el.classList.contains('list-card-swipe-wrap')){
+      const pid = el.getAttribute('data-id');
+      if(pid) items.push({t:'id', id: pid});
+    }
+  });
+  store.pinnedLayout = items;
+  const orderIds = items.filter(x=>x.t==='id').map(x=>x.id);
+  store.pinned.sort((a,b)=> orderIds.indexOf(a.id) - orderIds.indexOf(b.id));
+  saveStore();
+}
+function snapshotSeparatorHtml(label){
+  const safe = escapeHtml(label||'');
+  const attr = String(label||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  return '<div class="list-snapshot-sep" data-label="'+attr+'">'
+    + '<span class="list-snapshot-sep-line"></span>'
+    + '<span class="list-snapshot-sep-label">'+safe+'</span>'
+    + '<span class="list-snapshot-sep-line"></span>'
+    + '</div>';
+}
+function normalizePinnedEntry(e){
+  const r = Object.assign({ ts: nowTs() }, e||{});
+  if(!r.id) r.id = uid();
+  r.module = r.module || 'taper';
+  if(r.module === 'taper'){
+    r.current = Number(r.current) || 0;
+    r.target = Number(r.target) || 0;
+    r.angle = Number(r.angle) || 0;
+    r.zMove = Number(r.zMove) || 0;
+    r.direction = r.direction || 'none';
+  } else if(r.module === 'drill'){
+    r.dia = Number(r.dia) || 0;
+    r.angle = Number(r.angle) || 118;
+    r.tip = Number(r.tip) || 0;
+    r.hasDepth = !!r.hasDepth;
+    if(r.hasDepth){
+      r.depth = Number(r.depth) || 0;
+      r.total = Number(r.total) || 0;
+    }
+  } else if(r.module === 'xy'){
+    r.dia = Number(r.dia) || 0;
+    r.xOut = Number(r.xOut) || 0;
+    r.yOut = Number(r.yOut) || 0;
+  } else if(r.module === 'rpm'){
+    r.sfpm = Number(r.sfpm) || 0;
+    r.dia = Number(r.dia) || 0;
+    r.rpm = Number(r.rpm) || 0;
+    r.hasFeed = !!r.hasFeed;
+    if(r.hasFeed){
+      r.chipLoad = Number(r.chipLoad) || 0;
+      r.flutes = Number(r.flutes) || 1;
+      r.feed = Number(r.feed) || 0;
+    }
+  }
+  return r;
+}
+function sortSnapshotsForDisplay(arr, limit){
+  const sorted = [...arr].sort((a,b)=>{
+    const aUsed = a.lastUsed ? new Date(a.lastUsed).getTime() : 0;
+    const bUsed = b.lastUsed ? new Date(b.lastUsed).getTime() : 0;
+    if(bUsed !== aUsed) return bUsed - aUsed;
+    return new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime();
+  });
+  return limit ? sorted.slice(0, limit) : sorted;
+}
+function clearPinnedSelection(){
+  selectedPinnedIds = [];
+  const inp = document.getElementById('listSearchInput');
+  if(inp) inp.value = '';
+  updateListToolbarState();
+  hideListSearchMsg();
+}
+function selectPinnedEntry(id){
+  if(!selectedPinnedIds.includes(id)){
+    selectedPinnedIds.push(id);
+    updateListToolbarState();
+    renderListScreen();
+  }
+}
+function deselectPinnedEntry(id){
+  selectedPinnedIds = selectedPinnedIds.filter(x=>x!==id);
+  updateListToolbarState();
+  renderListScreen();
+}
+function onListCardTap(module, id, evt){
+  if(selectedPinnedIds.includes(id)){
+    if(evt){ evt.stopPropagation(); evt.preventDefault(); }
+    deselectPinnedEntry(id);
+    return;
+  }
+  restoreFromHistory(module, id, true);
+}
+function updateListToolbarState(){
+  const inp = document.getElementById('listSearchInput');
+  const clearBtn = document.getElementById('clearAllBtn');
+  const saveBtn = document.getElementById('saveSnapshotBtn');
+  if(!inp || !clearBtn || !saveBtn) return;
+  const hasSelection = selectedPinnedIds.length > 0;
+  inp.classList.toggle('active-save', hasSelection);
+  inp.placeholder = hasSelection ? 'Part Number or Name' : 'Search...';
+  clearBtn.classList.toggle('hidden', hasSelection);
+  saveBtn.classList.toggle('hidden', !hasSelection);
+  if(hasSelection) closeListSearchDropdown();
+}
+function showListSearchMsg(text, type){
+  const el = document.getElementById('listSearchMsg');
+  if(!el) return;
+  if(listSearchMsgTimer){ clearTimeout(listSearchMsgTimer); listSearchMsgTimer = null; }
+  el.textContent = text;
+  el.className = 'list-search-msg '+(type||'');
+  if(type === 'success'){
+    listSearchMsgTimer = setTimeout(()=>hideListSearchMsg(), 2000);
+  }
+}
+function hideListSearchMsg(){
+  const el = document.getElementById('listSearchMsg');
+  if(!el) return;
+  el.className = 'list-search-msg hidden';
+  el.textContent = '';
+  if(listSearchMsgTimer){ clearTimeout(listSearchMsgTimer); listSearchMsgTimer = null; }
+}
+function closeListSearchDropdown(){
+  listSearchRecallOpen = false;
+  const dd = document.getElementById('listSearchDropdown');
+  if(dd) dd.classList.add('hidden');
+}
+function renderListSearchDropdown(){
+  const inp = document.getElementById('listSearchInput');
+  const dd = document.getElementById('listSearchDropdown');
+  if(!inp || !dd) return;
+  if(selectedPinnedIds.length > 0){
+    closeListSearchDropdown();
+    return;
+  }
+  const q = inp.value.trim().toLowerCase();
+  const all = loadSavedSnapshots();
+  let html = '';
+  if(!q){
+    const rows = sortSnapshotsForDisplay(all, 4);
+    if(!rows.length){
+      html = '<div class="list-search-dropdown-item muted">No saved entries yet.</div>';
+    } else {
+      html = rows.map(s=>
+        '<div class="list-search-dropdown-item" data-snapshot-id="'+s.id+'">'+escapeHtml(s.label)+'</div>'
+      ).join('');
+    }
+    html += '<div class="list-search-dropdown-item list-search-dropdown-manage" data-manage="1">Manage Entries</div>';
+  } else {
+    const matches = sortSnapshotsForDisplay(all.filter(s=>(s.label||'').toLowerCase().includes(q)));
+    if(!matches.length){
+      html = '<div class="list-search-dropdown-item muted">No saved entries found.</div>';
+    } else {
+      html = matches.map(s=>
+        '<div class="list-search-dropdown-item" data-snapshot-id="'+s.id+'">'+escapeHtml(s.label)+'</div>'
+      ).join('');
+    }
+  }
+  dd.innerHTML = html;
+  dd.classList.remove('hidden');
+  listSearchRecallOpen = true;
+}
+function escapeHtml(str){
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function openListSearchRecall(){
+  if(selectedPinnedIds.length > 0) return;
+  renderListSearchDropdown();
+}
+function recallSavedSnapshot(snapshotId){
+  const snapshots = loadSavedSnapshots();
+  const snap = snapshots.find(s=>s.id===snapshotId);
+  if(!snap || !Array.isArray(snap.entries)) return;
+  ensurePinnedLayout();
+  const copies = snap.entries.map(e=>normalizePinnedEntry(Object.assign({}, e, { id: uid() })));
+  copies.forEach(c=>store.pinned.push(c));
+  store.pinnedLayout.push({t:'sep', label: snap.label});
+  copies.forEach(c=>store.pinnedLayout.push({t:'id', id: c.id}));
+  const idx = snapshots.findIndex(s=>s.id===snapshotId);
+  if(idx >= 0){
+    snapshots[idx].lastUsed = new Date().toISOString();
+    saveSavedSnapshots(snapshots);
+  }
+  saveStore();
+  closeListSearchDropdown();
+  const inp = document.getElementById('listSearchInput');
+  if(inp) inp.value = '';
+  renderListScreen();
+  refreshHomeListCard();
+}
+function saveSelectedSnapshot(){
+  const inp = document.getElementById('listSearchInput');
+  if(!inp) return;
+  const label = inp.value.trim();
+  hideListSearchMsg();
+  if(!label){
+    showListSearchMsg('Please enter a label to save.', 'error');
+    return;
+  }
+  const existing = loadSavedSnapshots();
+  if(existing.some(s=>(s.label||'').toLowerCase() === label.toLowerCase())){
+    showListSearchMsg('A saved entry with this name already exists.', 'error');
+    return;
+  }
+  const entries = selectedPinnedIds.map(id=>{
+    const p = getPinnedById(id);
+    return p ? JSON.parse(JSON.stringify(p)) : null;
+  }).filter(Boolean);
+  if(!entries.length) return;
+  const now = new Date().toISOString();
+  existing.push({
+    id: uid(),
+    label,
+    savedAt: now,
+    lastUsed: now,
+    entries
+  });
+  saveSavedSnapshots(existing);
+  clearPinnedSelection();
+  showListSearchMsg('Saved as "'+label+'".', 'success');
+  renderListScreen();
+  updateHomeBanner();
+}
+function fmtShortDate(iso){
+  if(!iso) return '';
+  try{
+    return new Date(iso).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+  }catch(e){ return ''; }
+}
+function openManageEntriesModal(){
+  closeListSearchDropdown();
+  document.getElementById('manageDeleteConfirm').classList.add('hidden');
+  document.getElementById('manageEntriesMain').classList.remove('hidden');
+  hideManageEntriesMsg();
+  renderManageEntriesList();
+  document.getElementById('manageEntriesModalBackdrop').classList.add('active');
+}
+function closeManageEntriesModal(){
+  document.getElementById('manageEntriesModalBackdrop').classList.remove('active');
+  cancelManageDelete();
+}
+let manageEntriesMsgTimer = null;
+function showManageEntriesMsg(text, type){
+  const el = document.getElementById('manageEntriesMsg');
+  if(!el) return;
+  if(manageEntriesMsgTimer){ clearTimeout(manageEntriesMsgTimer); manageEntriesMsgTimer = null; }
+  el.textContent = text;
+  el.className = 'list-search-msg '+(type||'');
+  if(type === 'success'){
+    manageEntriesMsgTimer = setTimeout(()=>hideManageEntriesMsg(), 2000);
+  }
+}
+function hideManageEntriesMsg(){
+  const el = document.getElementById('manageEntriesMsg');
+  if(!el) return;
+  el.className = 'list-search-msg hidden';
+  el.textContent = '';
+  if(manageEntriesMsgTimer){ clearTimeout(manageEntriesMsgTimer); manageEntriesMsgTimer = null; }
+}
+function renderManageEntriesList(){
+  const list = document.getElementById('manageEntriesList');
+  const delBtn = document.getElementById('manageDeleteBtn');
+  const snapshots = loadSavedSnapshots();
+  if(!snapshots.length){
+    list.innerHTML = '<div class="manage-entries-empty">No saved entries yet.</div>';
+    delBtn.disabled = true;
+    return;
+  }
+  const rows = sortSnapshotsForDisplay(snapshots).map(s=>
+    '<div class="manage-entry-row">'
+    + '<label><input type="checkbox" class="manage-entry-cb" value="'+s.id+'" onchange="updateManageDeleteBtn()">'
+    + '<span class="manage-entry-label">'+escapeHtml(s.label)+'</span></label>'
+    + '<span class="manage-entry-date">'+fmtShortDate(s.savedAt)+'</span>'
+    + '</div>'
+  ).join('');
+  list.innerHTML = '<label class="manage-select-all">'
+    + '<input type="checkbox" id="manageSelectAll" onchange="toggleManageSelectAll(this.checked)"> Select All'
+    + '</label>' + rows;
+  delBtn.disabled = true;
+}
+function getManageCheckedIds(){
+  return Array.from(document.querySelectorAll('.manage-entry-cb:checked')).map(cb=>cb.value);
+}
+function updateManageDeleteBtn(){
+  const delBtn = document.getElementById('manageDeleteBtn');
+  const checked = getManageCheckedIds();
+  delBtn.disabled = checked.length === 0;
+  const all = document.querySelectorAll('.manage-entry-cb');
+  const selAll = document.getElementById('manageSelectAll');
+  if(selAll && all.length){
+    selAll.checked = checked.length === all.length;
+    selAll.indeterminate = checked.length > 0 && checked.length < all.length;
+  }
+}
+function toggleManageSelectAll(on){
+  document.querySelectorAll('.manage-entry-cb').forEach(cb=>{ cb.checked = on; });
+  updateManageDeleteBtn();
+}
+function startManageDelete(){
+  const ids = getManageCheckedIds();
+  if(!ids.length) return;
+  document.getElementById('manageDeleteConfirmText').textContent =
+    'Delete '+ids.length+' saved entr'+(ids.length===1?'y':'ies')+'? This cannot be undone.';
+  document.getElementById('manageEntriesMain').classList.add('hidden');
+  document.getElementById('manageDeleteConfirm').classList.remove('hidden');
+}
+function cancelManageDelete(){
+  document.getElementById('manageDeleteConfirm').classList.add('hidden');
+  document.getElementById('manageEntriesMain').classList.remove('hidden');
+}
+function confirmManageDelete(){
+  const ids = new Set(getManageCheckedIds());
+  if(!ids.size) return;
+  const next = loadSavedSnapshots().filter(s=>!ids.has(s.id));
+  saveSavedSnapshots(next);
+  cancelManageDelete();
+  renderManageEntriesList();
+  updateHomeBanner();
+}
+function exportSavedSnapshots(){
+  const data = loadSavedSnapshots();
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  const d = new Date();
+  const ds = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'shop-calc-saved-'+ds+'.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+function triggerImportSavedSnapshots(){
+  const inp = document.getElementById('manageEntriesImportInput');
+  if(inp){ inp.value = ''; inp.click(); }
+}
+function handleImportSavedSnapshots(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const imported = JSON.parse(reader.result);
+      if(!Array.isArray(imported)) throw new Error('invalid');
+      const existing = loadSavedSnapshots();
+      const labels = new Set(existing.map(s=>(s.label||'').toLowerCase()));
+      let added = 0;
+      imported.forEach(item=>{
+        if(!item || typeof item !== 'object') return;
+        const label = (item.label||'').trim();
+        if(!label || labels.has(label.toLowerCase())) return;
+        const entry = {
+          id: item.id || uid(),
+          label,
+          savedAt: item.savedAt || new Date().toISOString(),
+          lastUsed: item.lastUsed || null,
+          entries: Array.isArray(item.entries) ? item.entries : []
+        };
+        existing.push(entry);
+        labels.add(label.toLowerCase());
+        added++;
+      });
+      saveSavedSnapshots(existing);
+      hideManageEntriesMsg();
+      if(added > 0){
+        showManageEntriesMsg(added+' entr'+(added===1?'y':'ies')+' imported.', 'success');
+      } else {
+        showManageEntriesMsg('No new entries imported (duplicates skipped).', 'success');
+      }
+      renderManageEntriesList();
+      updateHomeBanner();
+    }catch(e){
+      showManageEntriesMsg('Invalid file. Please select a valid Shop Calculators export.', 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+function wireListSearch(){
+  const inp = document.getElementById('listSearchInput');
+  const dd = document.getElementById('listSearchDropdown');
+  const wrap = document.getElementById('listSearchWrap');
+  if(!inp || !dd || !wrap) return;
+
+  inp.addEventListener('focus', ()=>{
+    if(selectedPinnedIds.length === 0) openListSearchRecall();
+  });
+  inp.addEventListener('input', ()=>{
+    hideListSearchMsg();
+    if(selectedPinnedIds.length > 0){
+      closeListSearchDropdown();
+      return;
+    }
+    if(document.activeElement === inp) renderListSearchDropdown();
+  });
+  dd.addEventListener('click', (e)=>{
+    const item = e.target.closest('.list-search-dropdown-item');
+    if(!item) return;
+    if(item.dataset.manage){
+      openManageEntriesModal();
+      return;
+    }
+    const sid = item.dataset.snapshotId;
+    if(sid) recallSavedSnapshot(sid);
+  });
+  document.addEventListener('click', (e)=>{
+    if(!listSearchRecallOpen) return;
+    if(wrap.contains(e.target)) return;
+    closeListSearchDropdown();
+  });
+}
 
 function displayLabelFor(r){
   if(r.module === 'rpm'){
@@ -1697,17 +2888,25 @@ function displayLabelFor(r){
 }
 
 function listCardFor(r){
-  const accent = MODULE_ACCENT[r.module];
+  r = normalizePinnedEntry(r);
+  const mod = r.module || 'taper';
+  const accent = MODULE_ACCENT[mod] || 'amber';
   let hero, heroLabel, chipsHtml;
 
   if(r.module === 'taper'){
     const dirTxt = r.direction==='none' ? 'No move' : (r.direction==='down' ? 'Z− (Down)' : 'Z+ (Up)');
     hero = (r.direction==='none' ? '0.0000' : r.zMove.toFixed(4));
     heroLabel = dirTxt;
+    const hasDiaChange = r.target != null && r.current != null
+      && isFinite(Number(r.target)) && isFinite(Number(r.current));
+    const diaChangeVal = hasDiaChange
+      ? Math.abs(Number(r.target) - Number(r.current)).toFixed(4)
+      : '—';
     const chips = [
-      ['Current', r.current.toFixed(4)],
-      ['Target', r.target.toFixed(4)],
-      ['Angle', r.angle+'°/side']
+      ['Ø Current', r.current.toFixed(4)],
+      ['Ø Target', r.target.toFixed(4)],
+      ['Angle', r.angle+'°/side'],
+      ['Ø Change', diaChangeVal]
     ];
     chipsHtml = chips.map(c=>
       '<div class="list-chip"><span class="ck">'+c[0]+'</span><span class="cv">'+c[1]+'</span></div>'
@@ -1729,29 +2928,21 @@ function listCardFor(r){
   } else if(r.module === 'xy'){
     hero = r.dia.toFixed(4);
     heroLabel = 'Hole Diameter';
-    const radius = r.dia/2;
     chipsHtml =
-      '<div class="list-chip eq">'
-        + '<span class="ck">X-Position − Radius</span>'
-        + '<span class="ceq">'+r.x.toFixed(4)+' − '+radius.toFixed(4)+'</span>'
-        + '<span class="cv">'+r.xOut.toFixed(4)+'</span>'
-      + '</div>'
-      + '<div class="list-chip eq">'
-        + '<span class="ck">Y-Position − Radius</span>'
-        + '<span class="ceq">'+r.y.toFixed(4)+' − '+radius.toFixed(4)+'</span>'
-        + '<span class="cv">'+r.yOut.toFixed(4)+'</span>'
-      + '</div>';
+      '<div class="list-chip"><span class="ck">X-Position</span><span class="cv">'+r.xOut.toFixed(4)+'</span></div>'
+      + '<div class="list-chip"><span class="ck">Y-Position</span><span class="cv">'+r.yOut.toFixed(4)+'</span></div>';
   } else {
     if(r.hasFeed){
-      hero = r.feed.toFixed(4);
-      heroLabel = 'Feed Rate';
+      hero = r.feed.toFixed(1);
+      heroLabel = 'IPM';
       const chips = [
         ['Chip Load', r.chipLoad.toFixed(4)],
         ['Flutes', r.flutes+'']
       ];
       chipsHtml = chips.map(c=>
         '<div class="list-chip"><span class="ck">'+c[0]+'</span><span class="cv">'+c[1]+'</span></div>'
-      ).join('');
+      ).join('')
+        + '<div class="list-chip-rpm-ref">Using <span>'+Math.round(r.rpm)+'</span> RPM</div>';
     } else {
       hero = Math.round(r.rpm)+'';
       heroLabel = 'RPM';
@@ -1765,12 +2956,16 @@ function listCardFor(r){
     }
   }
 
-  return '<div class="list-card-swipe-wrap" data-id="'+r.id+'">'
+  const isSel = selectedPinnedIds.includes(r.id);
+
+  return '<div class="list-card-swipe-wrap'+(isSel?' selected':'')+'" data-id="'+r.id+'">'
+    + (isSel ? '<div class="list-card-select-check" aria-hidden="true">✓</div>' : '')
+    + '<div class="list-card-select-bg">Select</div>'
     + '<div class="list-card-delete-bg">Remove</div>'
     + '<div class="list-card-entry accent-'+accent+'">'
-    + '<div class="lc-body" onclick="restoreFromHistory(\''+r.module+'\',\''+r.id+'\',true)">'
+    + '<div class="lc-body" onclick="onListCardTap(\''+mod+'\',\''+r.id+'\',event)">'
     + '<div class="lc-hero">'
-    + '<div class="lc-module"><span class="lc-icon">'+MODULE_ICON[r.module]+'</span>'+displayLabelFor(r)+'</div>'
+    + '<div class="lc-module"><span class="lc-icon">'+(MODULE_ICON[mod]||'◢')+'</span>'+displayLabelFor(r)+'</div>'
     + '<div class="lc-hero-center">'
     + '<div class="lc-hero-value">'+hero+'</div>'
     + '<div class="lc-hero-label">'+heroLabel+'</div>'
@@ -1785,29 +2980,38 @@ function listCardFor(r){
 function renderListScreen(){
   const wrap = document.getElementById('listEntries');
   const toolbar = document.getElementById('listToolbar');
+  const hasSaves = loadSavedSnapshots().length > 0;
   if(!store.pinned.length){
     wrap.innerHTML = '<div class="empty-state"><div class="big">★</div><p>No pinned results yet.<br>Pin a result from any module to see it here.</p></div>';
-    toolbar.style.display = 'none';
+    toolbar.style.display = hasSaves ? 'flex' : 'none';
+    clearPinnedSelection();
+    if(hasSaves) updateListToolbarState();
     return;
   }
   toolbar.style.display = 'flex';
-  wrap.innerHTML = store.pinned.map(r=>listCardFor(r)).join('');
+  ensurePinnedLayout();
+  const pinnedMap = {};
+  store.pinned.forEach(p=>{ pinnedMap[p.id] = p; });
+  let html = '';
+  store.pinnedLayout.forEach(item=>{
+    if(item.t === 'sep'){
+      html += snapshotSeparatorHtml(item.label);
+    } else if(item.t === 'id' && pinnedMap[item.id]){
+      html += listCardFor(pinnedMap[item.id]);
+    }
+  });
+  wrap.innerHTML = html;
+  updateListToolbarState();
   wireSwipeToDelete();
 }
 
-function confirmRemoveFromList(id){
-  const backdrop = document.getElementById('removeModalBackdrop');
-  document.getElementById('removeModalTitle').textContent = 'Remove from List?';
-  document.getElementById('removeModalText').textContent = 'This removes the pinned result. It will still appear in that module\'s history.';
-  document.getElementById('removeConfirmBtn').textContent = 'Remove';
-  document.getElementById('removeConfirmBtn').onclick = ()=>{
-    store.pinned = store.pinned.filter(p=>p.id!==id);
-    saveStore();
-    closeRemoveModal();
-    renderListScreen();
-    refreshHomeListCard();
-  };
-  backdrop.classList.add('active');
+function removeFromList(id){
+  store.pinned = store.pinned.filter(p=>p.id!==id);
+  removeIdFromPinnedLayout(id);
+  selectedPinnedIds = selectedPinnedIds.filter(x=>x!==id);
+  saveStore();
+  renderListScreen();
+  refreshHomeListCard();
 }
 function confirmClearAll(){
   if(!store.pinned.length) return;
@@ -1817,6 +3021,8 @@ function confirmClearAll(){
   document.getElementById('removeConfirmBtn').textContent = 'Clear All';
   document.getElementById('removeConfirmBtn').onclick = ()=>{
     store.pinned = [];
+    store.pinnedLayout = [];
+    clearPinnedSelection();
     saveStore();
     closeRemoveModal();
     renderListScreen();
@@ -1827,8 +3033,14 @@ function confirmClearAll(){
 function closeRemoveModal(){
   document.getElementById('removeModalBackdrop').classList.remove('active');
 }
+function openMathTraceModal(){
+  document.getElementById('mathTraceModalBackdrop').classList.add('active');
+}
+function closeMathTraceModal(){
+  document.getElementById('mathTraceModalBackdrop').classList.remove('active');
+}
 
-// ===== Swipe-to-delete (left swipe only) + Press-hold-drag to reorder =====
+// ===== Swipe-to-delete (left) + swipe-right select + press-hold-drag reorder =====
 function wireSwipeToDelete(){
   const container = document.getElementById('listEntries');
   const wraps = Array.from(document.querySelectorAll('.list-card-swipe-wrap'));
@@ -1838,10 +3050,9 @@ function wireSwipeToDelete(){
     const body = wrap.querySelector('.lc-body');
     const id = wrap.getAttribute('data-id');
 
-    let startX = 0, startY = 0, dx = 0;
+    let startX = 0, startY = 0, dx = 0, dxRight = 0, lastMoveX = 0;
     let swiping = false, decided = false, isHorizontal = false, moved = false;
     let longPressTimer = null, reordering = false;
-    const SWIPE_THRESHOLD = -70;
     const LONG_PRESS_MS = 420;
     const MOVE_CANCEL_PX = 10;
 
@@ -1865,7 +3076,7 @@ function wireSwipeToDelete(){
       // Find sibling to swap with based on vertical midpoint crossing
       const myRect = wrap.getBoundingClientRect();
       const myMid = myRect.top + myRect.height/2;
-      const siblings = Array.from(container.children).filter(c=>c!==wrap);
+      const siblings = Array.from(container.children).filter(c=>c!==wrap && c.classList.contains('list-card-swipe-wrap'));
 
       for(const sib of siblings){
         const r = sib.getBoundingClientRect();
@@ -1895,16 +3106,13 @@ function wireSwipeToDelete(){
       wrap.style.transform = '';
       wraps.forEach(w=>w.classList.remove('reorder-dim'));
 
-      // Persist new order based on current DOM order
-      const newOrderIds = Array.from(container.children).map(c=>c.getAttribute('data-id'));
-      store.pinned.sort((a,b)=> newOrderIds.indexOf(a.id) - newOrderIds.indexOf(b.id) );
-      saveStore();
+      persistPinnedOrderFromDom();
     }
 
     card.addEventListener('touchstart', (e)=>{
       startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
-      dx = 0; swiping = true; decided = false; isHorizontal = false; moved = false;
+      dx = 0; dxRight = 0; lastMoveX = 0; swiping = true; decided = false; isHorizontal = false; moved = false;
       card.style.transition = 'none';
 
       clearLongPress();
@@ -1935,8 +3143,20 @@ function wireSwipeToDelete(){
       }
       if(decided && isHorizontal){
         moved = true;
-        dx = Math.min(0, moveX);
-        card.style.transform = 'translateX('+dx+'px)';
+        lastMoveX = moveX;
+        if(moveX < 0){
+          dxRight = 0;
+          dx = Math.min(0, moveX);
+          card.style.transform = 'translateX('+dx+'px)';
+        } else if(moveX > 0){
+          dx = 0;
+          dxRight = Math.max(0, moveX);
+          card.style.transform = 'translateX('+dxRight+'px)';
+        } else {
+          dx = 0;
+          dxRight = 0;
+          card.style.transform = 'translateX(0)';
+        }
       }
     }, {passive:false});
 
@@ -1949,9 +3169,17 @@ function wireSwipeToDelete(){
       if(!swiping) return;
       swiping = false;
       card.style.transition = 'transform 0.18s ease';
-      if(isHorizontal && dx < SWIPE_THRESHOLD){
+      if(isHorizontal && dx < SWIPE_LEFT_THRESHOLD){
         card.style.transform = 'translateX(-100%)';
-        setTimeout(()=>confirmRemoveFromList(id), 160);
+        setTimeout(()=>removeFromList(id), 160);
+      } else if(isHorizontal && lastMoveX > SWIPE_RIGHT_THRESHOLD){
+        const onSlideBack = (ev)=>{
+          if(ev.propertyName !== 'transform') return;
+          card.removeEventListener('transitionend', onSlideBack);
+          selectPinnedEntry(id);
+        };
+        card.addEventListener('transitionend', onSlideBack);
+        card.style.transform = 'translateX(0)';
       } else {
         card.style.transform = 'translateX(0)';
       }
@@ -1969,6 +3197,9 @@ function wireSwipeToDelete(){
 
 // ===== Init =====
 refreshHomeListCard();
+wireListSearch();
+document.getElementById('mathInfoBtn').classList.remove('hidden');
+if(currentScreen) updateStepDots(currentScreen);
 
 // ===== Service worker for offline =====
 if ('serviceWorker' in navigator) {
